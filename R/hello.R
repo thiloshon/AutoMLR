@@ -1,18 +1,13 @@
-# Hello, world!
-#
-# This is an example function named 'hello' 
-# which prints 'Hello, world!'.
-#
-# You can learn more about package authoring with RStudio at:
-#
-#   http://r-pkgs.had.co.nz/
-#
-# Some useful keyboard shortcuts for package authoring:
-#
-#   Build and Reload Package:  'Ctrl + Shift + B'
-#   Check Package:             'Ctrl + Shift + E'
-#   Test Package:              'Ctrl + Shift + T'
+library(OpenML)
+tasks = listOMLTasks()
+run.results = listOMLRunEvaluations(task.id = ids)
 
-hello <- function() {
-  print("Hello, world!")
-}
+
+#in loop get 10000 records with 10000 offsets of run data for each 100 task ids in task data
+# until no data is returned and append to dataframe for all task ids
+
+
+ids <- c(tasks$task.id[1:16034])
+
+run.results1 = listOMLRunEvaluations(task.id = tasks$task.id[1:100], limit = 10000, offset = 10000)
+
