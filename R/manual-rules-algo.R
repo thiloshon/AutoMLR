@@ -4,7 +4,7 @@
 
 
 
-
+# Decision tree method. Deprecated
 suggest_learner <- function(dataset){
     if (is.na(dataset)){
         stop("Empty Dataset")
