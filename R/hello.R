@@ -1,4 +1,5 @@
 library(OpenML)
+library(data.table)
 tasks = listOMLTasks()
 run.results = listOMLRunEvaluations(task.id = ids)
 
@@ -10,4 +11,6 @@ run.results = listOMLRunEvaluations(task.id = ids)
 ids <- c(tasks$task.id[1:16034])
 
 run.results1 = listOMLRunEvaluations(task.id = tasks$task.id[1:100], limit = 10000, offset = 10000)
+
+max.nominal.att.distinct.values
 

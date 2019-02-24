@@ -8,7 +8,7 @@ library(arules)
 # run.evaluations = data.frame()
 
 # Download Data
-for (task in tasks$task.id[622:16034]) {
+for (task in tasks$task.id[1550:16034]) {
     # remove index
 
     print(paste("Task:", task, ", Index:", match(task, tasks$task.id)))
@@ -42,7 +42,7 @@ for (task in tasks$task.id[622:16034]) {
         }
 
         a <- readLines(dest.file)
-        b <- paste(paste(a, collapse = ""), "}")
+        #b <- paste(paste(a, collapse = ""), "}")
         #ERROR HANDLING
         run.results.set.n <- tryCatch(
             fromJSON(b)$evaluations$evaluation,
