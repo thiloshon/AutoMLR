@@ -14,3 +14,11 @@ run.results1 = listOMLRunEvaluations(task.id = tasks$task.id[1:100], limit = 100
 
 max.nominal.att.distinct.values
 
+
+ggplot(d, aes(x=sex,group=flow_name,fill=sex, y=usercpu_time_millis)) +
+    geom_boxplot(width = 1)
+
+ggplot(d, aes(x=flow_name, group=flow_name_fac, fill=flow_name_fac, y=usercpu_time_millis)) +
+    geom_boxplot(width = 1)
+
+ggplot(d, aes(x=factor(flow_name_fixed), y=usercpu_time_millis)) + stat_summary(fun.y="mean", geom="bar")

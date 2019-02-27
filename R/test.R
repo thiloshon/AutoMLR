@@ -133,3 +133,15 @@ fit <-
     )
 print(fit) # view results
 importance(fit) # importance of each predictor
+
+
+
+# Make the plot
+ggplot(data=d, aes(x=index, y=AUC.actual, ymin=0, ymax=1)) +
+    geom_line() +
+    geom_ribbon(alpha=0.5)
+
+plot(d$AUC.actual,d$AUC.predicted,
+     xlab="predicted",ylab="actual")
+abline(a=0,b=1)
+

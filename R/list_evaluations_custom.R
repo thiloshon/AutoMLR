@@ -68,38 +68,44 @@ for (task in tasks$task.id[1550:16034]) {
 }
 
 # Create dataframe from JSON files
-nm <- list.files(path = "E:/OpenMLData/")
-OpenMLRunEvaluations <- do.call(rbind.fill,
-        lapply(nm, function(x) {
+nm <- list.files(path = "E:/sample/")
+OpenMLRunEvaluationsSet02 <- do.call(rbind.fill,
+                                    lapply(nm, function(x) {
+                                        print(paste("Reading:" , x))
 
-            print(paste("Reading:" , x))
+                                        # run.results.set.n <- tryCatch(
+                                        #     fromJSON(paste(
+                                        #         paste(readLines(paste(
+                                        #             "E:/OpenMLData/", x, sep = ""
+                                        #         )), collapse = ""), "}"
+                                        #     ))$evaluations$evaluation,
+                                        #     error = function(e)
+                                        #         e
+                                        # )
 
-            run.results.set.n <- tryCatch(
-                fromJSON(paste(
-                    paste(readLines(paste(
-                        "E:/OpenMLData/", x, sep = ""
-                    )), collapse = ""), "}"
-                ))$evaluations$evaluation,
-                error = function(e)
-                    e
-            )
+                                        run.results.set.n <- tryCatch(
+                                            jsonlite::fromJSON(paste(
+                                                readLines(paste("E:/sample/", x, sep = "")), collapse = ""
+                                            ))$evaluations$evaluation,
+                                            error = function(e)
+                                                e
+                                        )
 
-            if (inherits(run.results.set.n, "error")) {
-                print("!!!!!!!!!!!!!!!!!!! Bad String !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                                        if (inherits(run.results.set.n, "error")) {
+                                            print("!!!!!!!!!!!!!!!!!!! Bad String !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
-                return(data.frame())
-            }
+                                            return(data.frame())
+                                        }
 
-            run.results.set.n
-        })
-)
+                                        run.results.set.n
+                                    }))
 
 
 
 
 evals <- as.data.table(OpenMLRunEvaluations)
 # convert long format to wide format
-setnames(evals, "function", "fun")
+
 form = run_id + task_id + setup_id + flow_id + flow_name + data_name + upload_time ~ fun
 evals = data.table::dcast(
     data = evals,
@@ -123,7 +129,7 @@ arr.ind = stri_detect_fixed(colnames(evals), "array_data_")
 colnames(evals)[arr.ind] = paste0(stri_replace_all_fixed(colnames(evals)[arr.ind], "array_data_", ""),
                                   "_array")
 if (!show.array.measures) {
-    evals = evals[,!arr.ind]
+    evals = evals[, !arr.ind]
 }
 
 # convert types (by default all is character)
