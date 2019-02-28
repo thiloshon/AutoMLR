@@ -22,3 +22,9 @@ ggplot(d, aes(x=flow_name, group=flow_name_fac, fill=flow_name_fac, y=usercpu_ti
     geom_boxplot(width = 1)
 
 ggplot(d, aes(x=factor(flow_name_fixed), y=usercpu_time_millis)) + stat_summary(fun.y="mean", geom="bar")
+
+d <- OpenMLRunEvaluationsData[!is.na(OpenMLRunEvaluationsData$),]
+mean <- aggregate(d[, 5:11], list(d$flow_name_fixed), mean)
+
+mean <- mean[order(-mean$ram_hours),]
+mean
