@@ -5,7 +5,7 @@
 
 
 # Decision tree method. Deprecated
-suggest_learner <- function(dataset){
+suggest_learner <- function(dataset, type = "regression"){
     if (is.na(dataset)){
         stop("Empty Dataset")
     }
@@ -23,27 +23,28 @@ suggest_learner <- function(dataset){
         return(list("Collect more records"))
     }
 
-    if(category_pred()){
+    algorithms_manual <- read.csv("inst/algorithms scoring.csv")
+
+    if(category_pred(type)){
 
         print("Catgorical Data")
-
 
         if(label_data()){
 
             # ------ Classification Algorithms ------
             print("Labelled Data")
-            if(number_of_records < 100000){
+            if(number_of_records > 100000){
                 print("Medium dataset")
                 if(text_data()){
                     print("Text Data")
-                    return(list("linear SVC", "naive bayes"))
+                    return(list("Linear Support Vector Classification - classif.LiblineaRL1L2SVC", "Naive Bayes - classif.naiveBayes"))
                 } else {
                     print("Non textual data")
-                    return(list("linear SVC", "K neibours classifier", "SVC", "Ensemble Classifiers"))
+                    return(list("Linear SVC - classif.LiblineaRL1L2SVC", "k-Nearest Neighbor - classif.kknn", "Support Vector Classification - classif.svm"))
                 }
             } else {
                 print("Large data")
-                return(list("SGD Classifier", "Kernal approximation"))
+                return(list("Support Vector Machines with Kernel - classif.ksvm", "Stochastic Gradient Descent - sgd v1.1"))
             }
 
             # ------ END OF Classification Algorithms ------
@@ -54,18 +55,18 @@ suggest_learner <- function(dataset){
 
             if(category_known()){
                 print("Known categories")
-                if(number_of_records < 100000){
+                if(number_of_records > 100000){
                     print("Medium dataset")
-                    return(list("Kmeans", "Spectral Clustering", "GMM"))
+                    return(list("K-Means - cluster.SimpleKMeans", "Spectral Clustering - kernlab v0.9-27", "Gaussian Mixture Model - mclust v5.4.2; ClusterR v1.1.8"))
                 }
                 print("Large data")
-                return(list("MiniBatch KMeans"))
+                return(list("MiniBatch KMeans - ClusterR v1.1.8"))
             }
 
             print("Unknown categories")
-            if(number_of_records < 100000){
+            if(number_of_records > 100000){
                 print("Medium dataset")
-                return(list("Mean shift", "VBGMM"))
+                return(list("Mean shift - meanShiftR v	0.53", "Variational Bayesian Gaussian Mixture Model - TargetScore v1.10.0"))
             }
             print("Large data")
             return(list("Tough luck"))
@@ -84,22 +85,39 @@ suggest_learner <- function(dataset){
 
         # ------ Regression Algorithms
 
-        if(number_of_records < 100000){
+        if(number_of_records > 100000){
             print("Medium dataset")
 
-            if(important_features()){
-                print("few features should be important")
-                return(list("lasso", "elasticnet"))
-            }
+            # if(important_features()){
+            #     print("few features should be important")
+            #     return(list("GLM with Lasso or Elasticnet Regularization - regr.glmnet"))
+            # }
 
-            return(list("RidgeRegression", "SVR(kernel = linear)", "SVR(kernal=rbf)", "Ensemble regressors"))
+            return(list("GLM with Lasso or Elasticnet Regularization - regr.glmnet", "Ridge Regression - glmnet v2.0-16 ; ridge v2.3", "Linear Kernel Support Vector Machines"))
         }
 
         print("large dataset")
-        return(list("SGD Regressor"))
+        return(list("Stochastic Gradient Descent - sgd v1.1"))
 
         # ------ END OF Regression Algorithms
     }
 
 
+}
+
+
+category_pred <- function(type){
+    if (type != "regression"){
+        return(TRUE)
+    } else {
+        return(FALSE)
+    }
+}
+
+label_data <- function(type){
+    if (type != "classification"){
+        return(TRUE)
+    } else {
+        return(FALSE)
+    }
 }
