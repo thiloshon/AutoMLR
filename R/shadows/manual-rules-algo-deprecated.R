@@ -10,7 +10,7 @@ suggest_learner <- function(dataset, type = "regression"){
         stop("Empty Dataset")
     }
 
-    # Manual Rules
+    # Manual Rules from spread sheet
     # Thanks to scikit-learn
 
 
@@ -24,6 +24,7 @@ suggest_learner <- function(dataset, type = "regression"){
     }
 
     algorithms_manual <- read.csv("inst/algorithms scoring.csv")
+    requiredScores <- vector()
 
     if(category_pred(type)){
 
@@ -33,8 +34,9 @@ suggest_learner <- function(dataset, type = "regression"){
 
             # ------ Classification Algorithms ------
             print("Labelled Data")
+
             if(number_of_records > 100000){
-                print("Medium dataset")
+                print("Large dataset")
                 if(text_data()){
                     print("Text Data")
                     return(list("Linear Support Vector Classification - classif.LiblineaRL1L2SVC", "Naive Bayes - classif.naiveBayes"))
@@ -43,7 +45,7 @@ suggest_learner <- function(dataset, type = "regression"){
                     return(list("Linear SVC - classif.LiblineaRL1L2SVC", "k-Nearest Neighbor - classif.kknn", "Support Vector Classification - classif.svm"))
                 }
             } else {
-                print("Large data")
+                print("Medium data")
                 return(list("Support Vector Machines with Kernel - classif.ksvm", "Stochastic Gradient Descent - sgd v1.1"))
             }
 
@@ -56,19 +58,19 @@ suggest_learner <- function(dataset, type = "regression"){
             if(category_known()){
                 print("Known categories")
                 if(number_of_records > 100000){
-                    print("Medium dataset")
+                    print("Large dataset")
                     return(list("K-Means - cluster.SimpleKMeans", "Spectral Clustering - kernlab v0.9-27", "Gaussian Mixture Model - mclust v5.4.2; ClusterR v1.1.8"))
                 }
-                print("Large data")
+                print("Medium data")
                 return(list("MiniBatch KMeans - ClusterR v1.1.8"))
             }
 
             print("Unknown categories")
             if(number_of_records > 100000){
-                print("Medium dataset")
-                return(list("Mean shift - meanShiftR v	0.53", "Variational Bayesian Gaussian Mixture Model - TargetScore v1.10.0"))
+                print("Large dataset")
+                return(list("Mean shift - meanShiftR v0.53", "Variational Bayesian Gaussian Mixture Model - TargetScore v1.10.0"))
             }
-            print("Large data")
+            print("Medium data")
             return(list("Tough luck"))
 
             # ------ END OF Clustering Algorithms ------
@@ -86,7 +88,7 @@ suggest_learner <- function(dataset, type = "regression"){
         # ------ Regression Algorithms
 
         if(number_of_records > 100000){
-            print("Medium dataset")
+            print("Large dataset")
 
             # if(important_features()){
             #     print("few features should be important")
@@ -96,7 +98,7 @@ suggest_learner <- function(dataset, type = "regression"){
             return(list("GLM with Lasso or Elasticnet Regularization - regr.glmnet", "Ridge Regression - glmnet v2.0-16 ; ridge v2.3", "Linear Kernel Support Vector Machines"))
         }
 
-        print("large dataset")
+        print("Medium dataset")
         return(list("Stochastic Gradient Descent - sgd v1.1"))
 
         # ------ END OF Regression Algorithms
