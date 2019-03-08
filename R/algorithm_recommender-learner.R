@@ -6,6 +6,8 @@ suggest_learner_meta <-
             stop("Give a predictor variable")
         }
 
+        dataset <- as.data.frame(dataset)
+
         factored.predictor <- as.factor(dataset[,predictor])
 
         classes.count <- as.data.frame(table(factored.predictor))

@@ -1,5 +1,5 @@
 # Decision tree method.
-suggest_learner_manual <-
+suggest_learner <-
     function(dataset, type = "regression", predictor) {
         if (nrow(dataset) == 0) {
             stop("Empty Dataset")
