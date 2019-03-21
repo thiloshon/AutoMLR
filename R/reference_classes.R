@@ -1,43 +1,5 @@
 library(tibble)
-
-PipeLine <-
-    setRefClass(
-        "PipeLine",
-        fields = list(
-            learner = "character",
-            preprocessing = "character",
-            cross.validation = "character"
-        ),
-        methods = list(
-            initialize = function(learner = character()) {
-                .self$learner <- learner
-            },
-
-            addPreprocessing = function(preproc) {
-                .self$preprocessing <- c(.self$preprocessing, preproc)
-            },
-            addValidation = function(validation) {
-                .self$cross.validation <- c(.self$cross.validation, validation)
-            },
-
-            tuneParameters = function() {
-
-            },
-
-            train = function() {
-
-            },
-
-            test = function() {
-
-            }
-
-
-
-        )
-    )
-
-
+library(mlr)
 
 MLPlan <-
     setRefClass(
@@ -47,25 +9,38 @@ MLPlan <-
             type = "character",
             target = "character",
             data.meta = "list",
-            ml.pipelines = "PipeLine"
+            ml.pipelines = "list"
 
         ),
         methods = list(
-            initialize = function(data = tibble(),
-                                  type = "classification",
-                                  target) {
-                .self$data <- as.data.frame(data)
+            initialize = function(type = "classification") {
                 .self$type <- type
-                .self$target <- target
-                .self$data.meta <- getMeta(data)
             },
 
-            getMeta = function(dataset) {
+            addData = function(data) {
+                .self$data <- as.data.frame(data)
+            },
+
+            addTarget = function(target) {
+                print(target)
+                print(is.numeric(target))
+
+                if (is.numeric(target)){
+                    .self$target <- names(.self$data)[target]
+                }else {
+                    .self$target <- target
+                }
+
+                getMeta()
+            },
+
+            getMeta = function() {
                 dataset <- .self$data
                 predictor <- .self$target
 
                 if (.self$type == "classification") {
                     factored.predictor <- as.factor(as.vector(dataset[, predictor]))
+
                     classes.count <-
                         as.data.frame(table(factored.predictor))
                     classes.count <-
@@ -103,7 +78,16 @@ MLPlan <-
             },
 
             addPipe = function(pipeline) {
-                # .self$ml.pipelines <- c(.self$ml.pipelines, pipeline)
+                .self$ml.pipelines <- c(.self$ml.pipelines, pipeline)
+            },
+
+            preprocess = function() {
+                for (pipe in .self$ml.pipelines) {
+                    for (preproc in pipe$preprocessing) {
+
+                    }
+
+                }
             },
 
             learn = function() {
@@ -120,3 +104,90 @@ MLPlan <-
 
         )
     )
+
+PipeLine <-
+    setRefClass(
+        "PipeLine",
+        fields = list(
+            id = "character",
+            learner = "character",
+            preprocessing = "character",
+            cross.validation = "character",
+            data = "data.frame",
+            train.split = "numeric"
+        ),
+        methods = list(
+            initialize = function(learner = character(),
+                                  id = paste("model-", as.character(sample(1:10 ^ 6, 1)), sep = "")) {
+                .self$id <- id
+                .self$learner <- learner
+            },
+
+            addSplit = function(percentage){
+                .self$train.split <- percentage
+            },
+
+            addPreprocessing = function(preproc, target = NULL) {
+                if (is.null(target)) {
+                    .self$preprocessing <- c(.self$preprocessing, preproc)
+                } else {
+                    .self$preprocessing <-
+                        c(.self$preprocessing, paste(preproc, target, sep = "~"))
+                }
+            },
+            addValidation = function(validation) {
+                .self$cross.validation <- c(.self$cross.validation, validation)
+            },
+
+
+            updateRows = function(oldRows, newRows) {
+                if (is.numeric(oldRows)) {
+                    #remove by index
+                } else if (is.logical(oldRows)) {
+                    #remove by logical
+                }
+            },
+
+            removeRows = function(rows) {
+
+            },
+
+            updateCols = function(target, newCols) {
+                if (is.numeric(oldRows)) {
+                    #remove by index
+                } else if (is.logical(oldRows)) {
+                    #remove by logical
+                }
+            },
+
+            removeCols = function(target, rows) {
+
+            },
+
+            tuneParameters = function() {
+
+            },
+
+            train = function() {
+
+            },
+
+            test = function() {
+
+            }
+
+
+
+        )
+    )
+
+
+
+
+
+plan <-
+    MLPlan(type = "classification")
+plan$addData(sample.data.iris)
+plan$addTarget("Species")
+
+plan$addPipe(pipe)

@@ -15,11 +15,16 @@ suggest_learner <-
 
         scoreboard <- suggest_learner_manual(dataset, type = type)
 
+        # removing non type algorithms
+
+        scoreboard <- scoreboard[scoreboard$type == type | scoreboard$type == "both", ]
+
+
         scoreboard$expected.accuracy <-
-            suggest_learner_meta(dataset, type = type, predictor = predictor)
+            suggest_learner_meta(dataset, type = type, predictor = predictor, scoreboard$meta_name)
 
 
-        scoreboard$sum <- rowSums(scoreboard[, 3:ncol(scoreboard)])
+        scoreboard$sum <- rowSums(scoreboard[, 6:ncol(scoreboard)])
 
         scoreboard <- scoreboard[order(-scoreboard$sum),]
 

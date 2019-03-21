@@ -4,7 +4,7 @@ options(scipen = 999)
 
 # Data set one
 
-data01 <- read.csv("./data/OpenMLRunEvaluationsSet01.csv")
+data01 <- read.csv("./data/OpenMLRunEvaluations.csv")
 
 data01 <- as.data.table(data01)
 

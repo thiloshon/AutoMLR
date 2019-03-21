@@ -1,6 +1,6 @@
 suggest_learner_meta <-
-    function(dataset, type = "classification", predictor) {
-        load("inst/algorithm-recommender-model.RData")
+    function(dataset, type = "classification", predictor, algorithms) {
+        load("C:/Users/Thiloshon/RProjects/rautoalgo/inst/algorithm-recommender-model.RData")
 
         if (is.na(predictor)) {
             stop("Give a predictor variable")
@@ -26,34 +26,43 @@ suggest_learner_meta <-
             sum(as.vector(is.na(dataset)), na.rm = TRUE)
         number.of.numeric.features <-
             sum(as.vector(unlist(
-                lapply(OpenMLMasterTrainingDataNoNAs, is.numeric)
+                lapply(dataset, is.numeric)
             )), na.rm = TRUE)
 
         number.of.symbolic.features <-
             sum(as.vector(unlist(
-                lapply(OpenMLMasterTrainingDataNoNAs, is.factor)
+                lapply(dataset, is.factor)
             )), na.rm = TRUE)
 
 
         #
         learners <-
             data.frame(
-                majority.class.size  = rep(majority.class.size, 107),
-                minority.class.size  = rep(minority.class.size, 107),
-                max.nominal.att.distinct.values  = rep(max.nominal.att.distinct.values, 107),
-                number.of.classes  = rep(number.of.classes, 107),
-                number.of.features  = rep(number.of.features, 107),
-                number.of.instances  = rep(number.of.instances, 107),
-                number.of.instances.with.missing.values  = rep(number.of.instances.with.missing.values, 107),
-                number.of.missing.values  = rep(number.of.missing.values, 107),
-                number.of.numeric.features  = rep(number.of.numeric.features, 107),
-                number.of.symbolic.features  = rep(number.of.symbolic.features, 107)
+                majority.class.size  = rep(majority.class.size, length(algorithms)),
+                minority.class.size  = rep(minority.class.size, length(algorithms)),
+                max.nominal.att.distinct.values  = rep(max.nominal.att.distinct.values, length(algorithms)),
+                number.of.classes  = rep(number.of.classes, length(algorithms)),
+                number.of.features  = rep(number.of.features, length(algorithms)),
+                number.of.instances  = rep(number.of.instances, length(algorithms)),
+                number.of.instances.with.missing.values  = rep(number.of.instances.with.missing.values, length(algorithms)),
+                number.of.missing.values  = rep(number.of.missing.values, length(algorithms)),
+                number.of.numeric.features  = rep(number.of.numeric.features, length(algorithms)),
+                number.of.symbolic.features  = rep(number.of.symbolic.features, length(algorithms))
 
             )
 
-        learners$flow_name_fixed <- unique(OpenMLMasterTrainingDataNoNAs$flow_name_fixed)
+        learners$flow_name_fixed <- algorithms
 
-        predicted.accuracies <- predict(nnet.model, newdata = learners)
+        predicted.accuracies <- tryCatch(
+            {
+                predict(nnet.model, newdata = learners)
+            },
+
+            error=function(error_message) {
+                return(7)
+            }
+        )
+
 
         return(predicted.accuracies)
 

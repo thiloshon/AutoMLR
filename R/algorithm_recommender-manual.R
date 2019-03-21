@@ -32,7 +32,7 @@ suggest_learner_manual <- function(dataset, type = "regression") {
 
         print(requiredScores)
 
-        if (label_data()) {
+        if (label_data(type)) {
             # ------ Classification Algorithms ------
             print("Labelled Data")
             requiredScores <- c(requiredScores, "labelled_data")
@@ -78,7 +78,7 @@ suggest_learner_manual <- function(dataset, type = "regression") {
             print(" Non labelled data")
             requiredScores <- c(requiredScores, "unlabelled_data")
 
-            if (category_known()) {
+            if (category_known(type)) {
                 print("Known categories")
                 requiredScores <- c(requiredScores, "known_clusters")
 
@@ -161,10 +161,10 @@ suggest_learner_manual <- function(dataset, type = "regression") {
         # ------ END OF Regression Algorithms
     }
 
-    algorithms_manual <- read.csv("inst/algorithms scoring.csv")
+    algorithms_manual <- read.csv("C:/Users/Thiloshon/RProjects/rautoalgo/inst/algorithms scoring.csv")
     algorithms_manual[is.na(algorithms_manual)] <- 0
 
-    scoreboard <- algorithms_manual[, c("algorithms_id", "algorithms_name", requiredScores)]
+    scoreboard <- algorithms_manual[, c("algorithms_id", "algorithms_name", "meta_name", "meta_influenze", "type", requiredScores)]
 
     return(scoreboard)
 
@@ -180,6 +180,14 @@ category_pred <- function(type) {
 }
 
 label_data <- function(type) {
+    if (type != "classification") {
+        return(TRUE)
+    } else {
+        return(FALSE)
+    }
+}
+
+category_known <- function(type) {
     if (type != "classification") {
         return(TRUE)
     } else {
