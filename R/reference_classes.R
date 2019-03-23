@@ -17,17 +17,31 @@ MLPlan <-
                 .self$type <- type
             },
 
+            printSelf = function() {
+                print("Machine Learning Plan Object")
+                print("Data: ")
+                print(.self$data)
+                print("Type: ")
+                print(.self$type)
+                print("Target: ")
+                print(.self$target)
+                print("Data Meta: ")
+                print(.self$data.meta)
+                print("Pipelines: ")
+
+                for (pipe in .self$ml.pipelines) {
+                    pipe$printSelf()
+                }
+            },
+
             addData = function(data) {
                 .self$data <- as.data.frame(data)
             },
 
             addTarget = function(target) {
-                print(target)
-                print(is.numeric(target))
-
-                if (is.numeric(target)){
+                if (is.numeric(target)) {
                     .self$target <- names(.self$data)[target]
-                }else {
+                } else {
                     .self$target <- target
                 }
 
@@ -44,7 +58,7 @@ MLPlan <-
                     classes.count <-
                         as.data.frame(table(factored.predictor))
                     classes.count <-
-                        classes.count[order(-classes.count$Freq),]
+                        classes.count[order(-classes.count$Freq), ]
 
                     .self$data.meta$number.of.classes <-
                         nrow(classes.count)
@@ -90,8 +104,32 @@ MLPlan <-
                 }
             },
 
-            learn = function() {
+            train = function() {
+                for (pipe in .self$ml.pipelines) {
 
+                    if (.self$type == "classification"){
+                        classif.task = mlr::makeClassifTask(id = pipe$id, data = .self$data, target = .self$target)
+                        pipe$addMLRTask(classif.task)
+
+                        # Classification tree, set it up for predicting probabilities
+                        classif.lrn = mlr::makeLearner(pipe$learner, predict.type = "response", fix.factors.prediction = TRUE)
+                        pipe$addMLRLearner(classif.lrn)
+
+                        mod = mlr::train(classif.lrn, classif.task)
+                        pipe$addMLRModel(mod)
+
+                    } else if(.self$type == "regression"){
+                        regr.task = mlr::makeRegrTask(id = pipe$id, data = .self$data, target = .self$target)
+                        pipe$addMLRTask(regr.task)
+
+                        # Regression gradient boosting machine, specify hyperparameters via a list
+                        regr.lrn = mlr::makeLearner(pipe$learner)
+                        pipe$addMLRLearner(regr.lrn)
+
+                        mod = mlr::train(regr.lrn, regr.task)
+                        pipe$addMLRModel(mod)
+                    }
+                }
             },
 
             evaluate = function() {
@@ -114,7 +152,10 @@ PipeLine <-
             preprocessing = "character",
             cross.validation = "character",
             data = "data.frame",
-            train.split = "numeric"
+            train.split = "numeric",
+            mlr.task = "list",
+            mlr.learner = "list",
+            mlr.model = "list"
         ),
         methods = list(
             initialize = function(learner = character(),
@@ -123,7 +164,7 @@ PipeLine <-
                 .self$learner <- learner
             },
 
-            addSplit = function(percentage){
+            addSplit = function(percentage) {
                 .self$train.split <- percentage
             },
 
@@ -137,6 +178,18 @@ PipeLine <-
             },
             addValidation = function(validation) {
                 .self$cross.validation <- c(.self$cross.validation, validation)
+            },
+
+            addMLRTask = function(mlr.task) {
+                .self$mlr.task <- list(mlr.task)
+            },
+
+            addMLRLearner = function(mlr.learner) {
+                .self$mlr.learner <- list(mlr.learner)
+            },
+
+            addMLRModel = function(mlr.model) {
+                .self$mlr.model <- list(mlr.model)
             },
 
 
@@ -174,6 +227,28 @@ PipeLine <-
 
             test = function() {
 
+            },
+            printSelf = function() {
+                print("Machine Learning Pipeline Object")
+                print("ID: ")
+                print(.self$id)
+                print("Learner: ")
+                print(.self$learner)
+                print("Preprocessing List: ")
+                print(.self$preprocessing)
+                print("Cross Validation: ")
+                print(.self$cross.validation)
+                print("Data: ")
+                print(.self$data)
+                print("Train Split: ")
+                print(.self$train.split)
+
+                print("Task: ")
+                print(.self$mlr.task)
+                print("Learner: ")
+                print(.self$mlr.learner)
+                print("Model: ")
+                print(.self$mlr.model)
             }
 
 
