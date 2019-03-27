@@ -157,9 +157,11 @@ shinyServer(function(input, output, session) {
             dataStore$mlPlan$addPipe(pipe)
         }
 
+        dataStore$mlPlan$split()
         dataStore$mlPlan$train()
+        #dataStore$mlPlan$test()
 
-        dataStore$mlPlan$printSelf()
+        #dataStore$mlPlan$printSelf()
     })
 
 
