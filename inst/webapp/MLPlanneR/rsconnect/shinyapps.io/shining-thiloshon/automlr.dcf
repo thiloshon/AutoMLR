@@ -1,0 +1,12 @@
+name: automlr
+title: automlr
+username:
+account: shining-thiloshon
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 874386
+bundleId: 2020535
+url: https://shining-thiloshon.shinyapps.io/automlr/
+when: 1555568112.10032
+asMultiple: FALSE
+asStatic: FALSE

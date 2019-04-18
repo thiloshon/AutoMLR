@@ -1,5 +1,6 @@
 library(shiny)
 library(ggplot2)
+library(mlr)
 
 shinyServer(function(input, output, session) {
     dataStore <-

@@ -17,23 +17,6 @@ MLPlan <-
                 .self$type <- type
             },
 
-            printSelf = function() {
-                print("Machine Learning Plan Object")
-                print("Data: ")
-                print(.self$data)
-                print("Type: ")
-                print(.self$type)
-                print("Target: ")
-                print(.self$target)
-                print("Data Meta: ")
-                print(.self$data.meta)
-                print("Pipelines: ")
-
-                for (pipe in .self$ml.pipelines) {
-                    pipe$printSelf()
-                }
-            },
-
             addData = function(data) {
                 .self$data <- as.data.frame(data)
             },
@@ -58,7 +41,7 @@ MLPlan <-
                     classes.count <-
                         as.data.frame(table(factored.predictor))
                     classes.count <-
-                        classes.count[order(-classes.count$Freq), ]
+                        classes.count[order(-classes.count$Freq),]
 
                     .self$data.meta$number.of.classes <-
                         nrow(classes.count)
@@ -95,50 +78,113 @@ MLPlan <-
                 .self$ml.pipelines <- c(.self$ml.pipelines, pipeline)
             },
 
+            split = function() {
+                for (pipe in .self$ml.pipelines) {
+                    pipe$addSplit(makeResampleDesc("Holdout", split = 0.6))
+                }
+            },
+
             preprocess = function() {
                 for (pipe in .self$ml.pipelines) {
-                    for (preproc in pipe$preprocessing) {
+                    pipe$addPreprocessing("removeConstantFeatures")
+                    pipe$addPreprocessing("normalizeFeatures")
+                    pipe$addPreprocessing("mergeSmallFactorLevels")
 
+                    for (preproc in pipe$preprocessing) {
+                        if(grepl("~", preproc, fixed = T)){
+                            pair <- strsplit(preproc, "~", fixed = T)
+                        } else {
+
+                        }
                     }
 
                 }
             },
 
             train = function() {
-                for (pipe in .self$ml.pipelines) {
+                configureMlr(on.learner.error = "warn")
 
-                    if (.self$type == "classification"){
-                        classif.task = mlr::makeClassifTask(id = pipe$id, data = .self$data, target = .self$target)
+                data = subset(.self$data, subset = !is.na(.self$data[.self$target]))
+
+                for (pipe in .self$ml.pipelines) {
+                    if (.self$type == "classification") {
+                        classif.task = mlr::makeClassifTask(
+                            id = pipe$id,
+                            data = data,
+                            target = .self$target
+                        )
                         pipe$addMLRTask(classif.task)
 
                         # Classification tree, set it up for predicting probabilities
-                        classif.lrn = mlr::makeLearner(pipe$learner, predict.type = "response", fix.factors.prediction = TRUE)
+                        classif.lrn = mlr::makeLearner(
+                            pipe$learner,
+                            predict.type = "response",
+                            fix.factors.prediction = TRUE
+                        )
                         pipe$addMLRLearner(classif.lrn)
 
-                        mod = mlr::train(classif.lrn, classif.task)
+                        mod = mlr::resample(
+                            classif.lrn,
+                            classif.task,
+                            pipe$train.split[[1]],
+                            measures = list(mmce, acc, timetrain)
+                        )
                         pipe$addMLRModel(mod)
 
-                    } else if(.self$type == "regression"){
-                        regr.task = mlr::makeRegrTask(id = pipe$id, data = .self$data, target = .self$target)
+
+
+                    } else if (.self$type == "regression") {
+                        regr.task = mlr::makeRegrTask(
+                            id = pipe$id,
+                            data = .self$data,
+                            target = .self$target
+                        )
                         pipe$addMLRTask(regr.task)
 
                         # Regression gradient boosting machine, specify hyperparameters via a list
                         regr.lrn = mlr::makeLearner(pipe$learner)
                         pipe$addMLRLearner(regr.lrn)
 
-                        mod = mlr::train(regr.lrn, regr.task)
+                        mod = mlr::resample(
+                            regr.lrn,
+                            regr.task,
+                            pipe$train.split[[1]],
+                            measures = list(mmce, acc, timetrain)
+                        )
                         pipe$addMLRModel(mod)
+
                     }
                 }
             },
 
-            test = function() {
 
+            test = function() {
+                for (pipe in .self$ml.pipelines) {
+                    print(pipe$mlr.model[[1]]$aggr)
+                }
 
             },
 
+
             deploy = function() {
 
+            },
+
+            printSelf = function() {
+                print("Machine Learning Plan Object")
+                print("Data: ")
+                print(.self$data)
+                print("Type: ")
+                print(.self$type)
+                print("Target: ")
+                print(.self$target)
+                print("Data Meta: ")
+                print(.self$data.meta)
+                print("Pipelines: ")
+
+                for (pipe in .self$ml.pipelines) {
+                    pipe$printSelf()
+                }
             }
 
         )
@@ -153,7 +199,7 @@ PipeLine <-
             preprocessing = "character",
             cross.validation = "character",
             data = "data.frame",
-            train.split = "numeric",
+            train.split = "list",
             mlr.task = "list",
             mlr.learner = "list",
             mlr.model = "list"
@@ -165,8 +211,8 @@ PipeLine <-
                 .self$learner <- learner
             },
 
-            addSplit = function(percentage) {
-                .self$train.split <- percentage
+            addSplit = function(resample) {
+                .self$train.split <- list(resample)
             },
 
             addPreprocessing = function(preproc, target = NULL) {
@@ -251,9 +297,6 @@ PipeLine <-
                 print("Model: ")
                 print(.self$mlr.model)
             }
-
-
-
         )
     )
 

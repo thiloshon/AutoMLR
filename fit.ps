@@ -1,0 +1,1438 @@
+%!PS-Adobe-3.0
+%%DocumentNeededResources: font Helvetica
+%%+ font Helvetica-Bold
+%%+ font Helvetica-Oblique
+%%+ font Helvetica-BoldOblique
+%%+ font Symbol
+%%DocumentMedia: letter 612 792 0 () ()
+%%Title: R Graphics Output
+%%Creator: R Software
+%%Pages: (atend)
+%%Orientation: Landscape
+%%BoundingBox: 18 18 594 774
+%%EndComments
+%%BeginProlog
+/bp  { gs sRGB 612.00 0 translate 90 rotate gs } def
+% begin .ps.prolog
+/gs  { gsave } bind def
+/gr  { grestore } bind def
+/ep  { showpage gr gr } bind def
+/m   { moveto } bind def
+/l  { rlineto } bind def
+/np  { newpath } bind def
+/cp  { closepath } bind def
+/f   { fill } bind def
+/o   { stroke } bind def
+/c   { newpath 0 360 arc } bind def
+/r   { 4 2 roll moveto 1 copy 3 -1 roll exch 0 exch rlineto 0 rlineto -1 mul 0 exch rlineto closepath } bind def
+/p1  { stroke } bind def
+/p2  { gsave bg fill grestore newpath } bind def
+/p3  { gsave bg fill grestore stroke } bind def
+/p6  { gsave bg eofill grestore newpath } bind def
+/p7  { gsave bg eofill grestore stroke } bind def
+/t   { 5 -2 roll moveto gsave rotate
+       1 index stringwidth pop
+       mul neg 0 rmoveto show grestore } bind def
+/ta  { 4 -2 roll moveto gsave rotate show } bind def
+/tb  { 2 -1 roll 0 rmoveto show } bind def
+/cl  { grestore gsave newpath 3 index 3 index moveto 1 index
+       4 -1 roll lineto  exch 1 index lineto lineto
+       closepath clip newpath } bind def
+/rgb { setrgbcolor } bind def
+/s   { scalefont setfont } bind def
+% end   .ps.prolog
+/sRGB { [ /CIEBasedABC
+          << /DecodeLMN
+               [ { dup 0.03928 le
+                        {12.92321 div}
+                        {0.055 add 1.055 div 2.4 exp }
+                     ifelse
+                 } bind dup dup
+               ]
+             /MatrixLMN [0.412457 0.212673 0.019334
+                         0.357576 0.715152 0.119192
+                         0.180437 0.072175 0.950301]
+             /WhitePoint [0.9505 1.0 1.0890]
+           >>
+         ] setcolorspace } bind def
+/srgb { setcolor } bind def
+% begin encoding
+/WinAnsiEncoding [
+ /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+ /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+ /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+ /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+ /space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quoteright
+ /parenleft /parenright /asterisk /plus /comma /minus /period /slash
+ /zero /one /two /three /four /five /six /seven
+ /eight /nine /colon /semicolon /less /equal /greater /question
+ /at /A /B /C /D /E /F /G
+ /H /I /J /K /L /M /N /O
+ /P /Q /R /S /T /U /V /W
+ /X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore
+ /grave /a /b /c /d /e /f /g
+ /h /i /j /k /l /m /n /o
+ /p /q /r /s /t /u /v /w
+ /x /y /z /braceleft /bar /braceright /asciitilde /.notdef
+ /Euro /.notdef /quotesinglbase /florin /quotedblbase /ellipsis /dagger /daggerdbl
+ /circumflex /perthousand /Scaron /guilsinglleft /OE /.notdef /Zcaron /.notdef
+ /.notdef /quoteleft /quoteright /quotedblleft /quotedblright /bullet /endash /emdash
+ /tilde /trademark /scaron /guilsinglright /oe /.notdef /zcaron /Ydieresis
+ /space /exclamdown /cent /sterling /currency /yen /brokenbar /section
+ /dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron
+ /degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /periodcentered
+ /cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown
+ /Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla
+ /Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis
+ /Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply
+ /Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls
+ /agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla
+ /egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis
+ /eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide
+ /oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis
+]
+ def
+% end encoding
+%%IncludeResource: font Helvetica
+/Helvetica findfont
+dup length dict begin
+  {1 index /FID ne {def} {pop pop} ifelse} forall
+  /Encoding WinAnsiEncoding def
+  currentdict
+  end
+/Font1 exch definefont pop
+%%IncludeResource: font Helvetica-Bold
+/Helvetica-Bold findfont
+dup length dict begin
+  {1 index /FID ne {def} {pop pop} ifelse} forall
+  /Encoding WinAnsiEncoding def
+  currentdict
+  end
+/Font2 exch definefont pop
+%%IncludeResource: font Helvetica-Oblique
+/Helvetica-Oblique findfont
+dup length dict begin
+  {1 index /FID ne {def} {pop pop} ifelse} forall
+  /Encoding WinAnsiEncoding def
+  currentdict
+  end
+/Font3 exch definefont pop
+%%IncludeResource: font Helvetica-BoldOblique
+/Helvetica-BoldOblique findfont
+dup length dict begin
+  {1 index /FID ne {def} {pop pop} ifelse} forall
+  /Encoding WinAnsiEncoding def
+  currentdict
+  end
+/Font4 exch definefont pop
+%%IncludeResource: font Symbol
+/Symbol findfont
+dup length dict begin
+  {1 index /FID ne {def} {pop pop} ifelse} forall
+  currentdict
+  end
+/Font5 exch definefont pop
+%%EndProlog
+%%Page: 1 1
+bp
+18.00 18.00 774.00 594.00 cl
+48.24 48.24 743.76 534.96 cl
+/Font1 findfont 12 s
+0 0 0 srgb
+375.90 476.08 (|) .5 0 t
+0.75 setlinewidth
+[] 0 setdash
+1 setlinecap
+1 setlinejoin
+10.00 setmiterlimit
+np
+215.95 404.27 m
+127.96 75.11 l
+63.98 0 l
+127.95 -75.11 l
+o
+np
+169.22 329.16 m
+37.38 75.11 l
+18.69 0 l
+37.38 -75.11 l
+o
+np
+215.99 254.04 m
+37.35 75.12 l
+18.67 0 l
+37.35 -75.12 l
+o
+np
+169.73 178.93 m
+37.01 75.11 l
+18.50 0 l
+37.01 -75.11 l
+o
+np
+127.67 103.82 m
+33.64 75.11 l
+16.83 0 l
+33.64 -75.11 l
+o
+np
+449.41 329.16 m
+69.15 75.11 l
+34.57 0 l
+69.14 -75.11 l
+o
+np
+402.73 254.04 m
+37.35 75.12 l
+18.67 0 l
+37.35 -75.12 l
+o
+np
+356.46 178.93 m
+37.02 75.11 l
+18.50 0 l
+37.01 -75.11 l
+o
+np
+406.94 103.82 m
+33.64 75.11 l
+16.83 0 l
+33.64 -75.11 l
+o
+np
+580.22 254.04 m
+33.64 75.12 l
+16.83 0 l
+33.64 -75.12 l
+o
+211.07 446.29 (major) 0 ta
+0.180 (ity.class) tb
+-0.180 (.siz) tb
+-0.180 (e< 617.5) tb gr
+122.22 371.18 (major) 0 ta
+0.180 (ity.class) tb
+-0.180 (.siz) tb
+-0.180 (e>=565) tb gr
+167.46 294.83 (n) 0 ta
+-0.120 (umber) tb
+-0.600 (.of) tb
+-0.360 (.f) tb
+-0.360 (eatures< 28.5) tb gr
+-838.04 220.87 (flo) 0 ta
+-0.180 (w_name_fix) tb
+-0.360 (ed=ml..C50,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.C50.b) tb
+-0.480 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.ct,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.ctr) tb
+-0.600 (.b) tb
+-0.480 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.dvlpr) tb
+0.480 (tykt.ct,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.f) tb
+-0.360 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.ft..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.f) tb
+-0.360 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.gs) tb
+-0.180 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.gb) tb
+-0.480 (...,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.glmn,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.gl...,ml..J48.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.kk,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.kknn.p) tb
+-0.420 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.k...,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.l,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.n) tb
+-0.240 (vBys) tb
+-0.180 (.p) tb
+-0.420 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.n.,m..T) tb
+-1.440 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.300 (ngr) tb
+-0.600 (.p) tb
+-0.420 (..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.360 (p) tb
+-0.420 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.360 (pr) tb
+0.480 (t.b) tb
+-0.480 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.360 (pr) tb
+0.480 (t.p) tb
+-0.420 (..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.sDNN...,m..LD) tb
+-0.840 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.s) tb
+-0.180 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.sv...,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.x) tb gr
+53.78 145.78 (n) 0 ta
+-0.120 (umber) tb
+-0.600 (.of) tb
+-0.360 (.symbolic.f) tb
+-0.360 (eatures>=1.5) tb gr
+395.28 369.95 (n) 0 ta
+-0.120 (umber) tb
+-0.600 (.of) tb
+-0.360 (.n) tb
+-0.120 (umer) tb
+0.180 (ic.f) tb
+-0.360 (eatures>=5.5) tb gr
+354.20 294.83 (n) 0 ta
+-0.120 (umber) tb
+-0.600 (.of) tb
+-0.360 (.f) tb
+-0.360 (eatures< 23.5) tb gr
+-806.29 220.93 (flo) 0 ta
+-0.180 (w_name_fix) tb
+-0.360 (ed=ml..NN,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.ct,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.dDNN...,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.dDNN..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.dvlpr) tb
+0.480 (tykt.ct,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.480 (t.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.f) tb
+-0.360 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.ft..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.f) tb
+-0.360 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.gbm.m.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.gb) tb
+-0.480 (...,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.glmb) tb
+-0.480 (..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.glmn,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.gl...,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.kk,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.kk.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.lg..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.md.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.mlp) tb
+-0.420 (..,ml..B.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.n) tb
+-0.240 (vBys) tb
+-0.180 (.p) tb
+-0.420 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.n.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.nnt.p) tb
+-0.420 (.,m..T) tb
+-1.440 (,m..H,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.qd.p) tb
+-0.420 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.rd.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.360 (p) tb
+-0.420 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.360 (pr) tb
+0.480 (t.pr) tb
+0.360 (prc.p) tb
+-0.420 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.s) tb
+-0.180 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.svm.p) tb
+-0.420 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.x,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.x..) tb gr
+333.55 144.61 (n) 0 ta
+-0.120 (umber) tb
+-0.600 (.of) tb
+-0.360 (.n) tb
+-0.120 (umer) tb
+0.180 (ic.f) tb
+-0.360 (eatures< 12.5) tb gr
+504.83 296.00 (n) 0 ta
+-0.120 (umber) tb
+-0.600 (.of) tb
+-0.360 (.symbolic.f) tb
+-0.360 (eatures< 16.5) tb gr
+401.17 431.31 (major) 0 ta
+0.180 (ity.class) tb
+-0.180 (.siz) tb
+-0.180 (e>=617.5) tb gr
+180.13 356.20 (major) 0 ta
+0.180 (ity.class) tb
+-0.180 (.siz) tb
+-0.180 (e< 565) tb gr
+221.64 279.86 (n) 0 ta
+-0.120 (umber) tb
+-0.600 (.of) tb
+-0.360 (.f) tb
+-0.360 (eatures>=28.5) tb gr
+-1461.85 205.90 (flo) 0 ta
+-0.180 (w_name_fix) tb
+-0.360 (ed=m..NN.,m..C50..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.C50.p) tb
+-0.420 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.cf) tb
+-0.360 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.cfrst.m.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.cf) tb
+-0.360 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.ct..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.ctr) tb
+-0.600 (.p) tb
+-0.420 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.cv.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.dvlpr) tb
+0.480 (tykt.cf) tb
+-0.360 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.480 (t..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.480 (t.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.v..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.v.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.gs) tb
+-0.180 (..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.gs) tb
+-0.180 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.gbm.m.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.gb) tb
+-0.480 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.gl.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.kk.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.kn,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.ks) tb
+-0.180 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.ks) tb
+-0.180 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.ld..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.l.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.md.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.ml.,ml..B) tb
+-0.240 (,ml..B.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.q.,ml..F) tb
+-1.800 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.300 (ndmFrst.f) tb
+-0.360 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.300 (ndmFrst.m.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.300 (ndmFrst.p) tb
+-0.420 (,m..FSRC..,ml..FSRC.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.300 (n,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.300 (ngr) tb
+-0.600 (.m..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.300 (ngr) tb
+-0.600 (.m.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.rd..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.rd.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.360 (pr) tb
+0.480 (t.m..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.360 (pr) tb
+0.480 (t.p) tb
+-0.420 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.360 (pr) tb
+0.480 (t.pr) tb
+0.360 (prc.f) tb
+-0.360 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.360 (pr) tb
+0.480 (t.t,m..RRF) tb
+-1.800 (...,ml..RRF) tb
+-1.800 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.s) tb
+-0.180 (.) tb gr
+106.09 130.81 (n) 0 ta
+-0.120 (umber) tb
+-0.600 (.of) tb
+-0.360 (.symbolic.f) tb
+-0.360 (eatures< 1.5) tb gr
+500.83 354.97 (n) 0 ta
+-0.120 (umber) tb
+-0.600 (.of) tb
+-0.360 (.n) tb
+-0.120 (umer) tb
+0.180 (ic.f) tb
+-0.360 (eatures< 5.5) tb gr
+408.38 279.86 (n) 0 ta
+-0.120 (umber) tb
+-0.600 (.of) tb
+-0.360 (.f) tb
+-0.360 (eatures>=23.5) tb gr
+-1258.82 205.90 (flo) 0 ta
+-0.180 (w_name_fix) tb
+-0.360 (ed=m..NN.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.bstng.m.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.C50.p) tb
+-0.420 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.cf) tb
+-0.360 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.cfrst.p) tb
+-0.420 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.ct..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.ctr) tb
+-0.600 (.p) tb
+-0.420 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.cv..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.cv.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.v..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.v.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.fn..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.gs) tb
+-0.180 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.gb) tb
+-0.480 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.glmn..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.gl.,m..J48..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.kknn.p) tb
+-0.420 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.k...,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.ksvm.m.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.ks) tb
+-0.180 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.ksvm.p) tb
+-0.420 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.l.,m..LRL1,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.mlt..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.ml.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.nnt.m.,m..P) tb
+-2.160 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.q.,ml..F) tb
+-1.800 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.300 (ndmFrst.p) tb
+-0.420 (,ml..FSRC.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.300 (n,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.300 (ngr) tb
+-0.600 (.m..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.300 (ngr) tb
+-0.600 (.p) tb
+-0.420 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.300 (ngr) tb
+-0.600 (.p) tb
+-0.420 (..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.rd..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.180 (k..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.360 (pr) tb
+0.480 (t.m..,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.360 (pr) tb
+0.480 (t.p) tb
+-0.420 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.r) tb
+0.360 (pr) tb
+0.480 (t.p) tb
+-0.420 (..,ml..RRF) tb
+-1.800 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.sd...,m..LD) tb
+-0.840 (,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.svm.m.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.s) tb
+-0.180 (.,mlr) tb
+-0.600 (.clssf) tb
+-0.360 (.sv...) tb gr
+382.18 129.64 (n) 0 ta
+-0.120 (umber) tb
+-0.600 (.of) tb
+-0.360 (.n) tb
+-0.120 (umer) tb
+0.180 (ic.f) tb
+-0.360 (eatures>=12.5) tb gr
+553.47 281.03 (n) 0 ta
+-0.120 (umber) tb
+-0.600 (.of) tb
+-0.360 (.symbolic.f) tb
+-0.360 (eatures>=16.5) tb gr
+/bg { 1 1 1 srgb } def
+np
+ 430.88 479.38 m
+-0.30 2.55 l
+-0.90 2.53 l
+-1.49 2.47 l
+-2.06 2.39 l
+-2.62 2.28 l
+-3.13 2.14 l
+-3.62 1.99 l
+-4.07 1.81 l
+-4.47 1.61 l
+-4.83 1.39 l
+-5.13 1.16 l
+-5.37 0.92 l
+-5.56 0.66 l
+-5.69 0.40 l
+-5.74 0.14 l
+-5.75 -0.14 l
+-5.69 -0.40 l
+-5.56 -0.66 l
+-5.37 -0.92 l
+-5.13 -1.16 l
+-4.82 -1.39 l
+-4.48 -1.61 l
+-4.07 -1.81 l
+-3.62 -1.99 l
+-3.13 -2.14 l
+-2.61 -2.28 l
+-2.07 -2.39 l
+-1.49 -2.47 l
+-0.90 -2.53 l
+-0.30 -2.55 l
+0.30 -2.56 l
+0.90 -2.52 l
+1.49 -2.47 l
+2.07 -2.39 l
+2.61 -2.28 l
+3.13 -2.15 l
+3.62 -1.98 l
+4.07 -1.81 l
+4.48 -1.61 l
+4.82 -1.40 l
+5.13 -1.16 l
+5.37 -0.91 l
+5.56 -0.67 l
+5.69 -0.40 l
+5.75 -0.13 l
+5.74 0.13 l
+5.69 0.40 l
+5.56 0.67 l
+5.37 0.91 l
+5.13 1.16 l
+4.83 1.40 l
+4.47 1.61 l
+4.07 1.81 l
+3.62 1.98 l
+3.13 2.15 l
+2.62 2.28 l
+2.06 2.39 l
+1.49 2.47 l
+0.90 2.52 l
+0.30 2.56 l
+cp p3
+np
+ 270.93 404.27 m
+-0.30 2.55 l
+-0.90 2.53 l
+-1.49 2.47 l
+-2.06 2.39 l
+-2.61 2.28 l
+-3.14 2.14 l
+-3.62 1.99 l
+-4.07 1.81 l
+-4.47 1.61 l
+-4.83 1.39 l
+-5.13 1.16 l
+-5.37 0.92 l
+-5.56 0.66 l
+-5.69 0.40 l
+-5.74 0.13 l
+-5.75 -0.13 l
+-5.68 -0.40 l
+-5.56 -0.66 l
+-5.38 -0.92 l
+-5.12 -1.16 l
+-4.83 -1.39 l
+-4.47 -1.61 l
+-4.07 -1.81 l
+-3.63 -1.99 l
+-3.13 -2.14 l
+-2.61 -2.28 l
+-2.07 -2.39 l
+-1.49 -2.47 l
+-0.90 -2.53 l
+-0.30 -2.55 l
+0.30 -2.56 l
+0.90 -2.52 l
+1.49 -2.47 l
+2.07 -2.39 l
+2.61 -2.28 l
+3.13 -2.15 l
+3.63 -1.99 l
+4.07 -1.80 l
+4.47 -1.61 l
+4.83 -1.40 l
+5.12 -1.16 l
+5.38 -0.91 l
+5.56 -0.67 l
+5.68 -0.40 l
+5.75 -0.13 l
+5.74 0.13 l
+5.69 0.40 l
+5.56 0.67 l
+5.37 0.91 l
+5.13 1.16 l
+4.83 1.40 l
+4.47 1.61 l
+4.07 1.80 l
+3.62 1.99 l
+3.14 2.15 l
+2.61 2.28 l
+2.06 2.39 l
+1.49 2.47 l
+0.90 2.52 l
+0.30 2.56 l
+cp p3
+np
+ 317.66 329.16 m
+-0.30 2.55 l
+-0.90 2.53 l
+-1.49 2.47 l
+-2.06 2.39 l
+-2.62 2.27 l
+-3.13 2.15 l
+-3.62 1.99 l
+-4.07 1.81 l
+-4.48 1.61 l
+-4.82 1.39 l
+-5.13 1.16 l
+-5.37 0.92 l
+-5.56 0.66 l
+-5.69 0.40 l
+-5.75 0.13 l
+-5.74 -0.13 l
+-5.69 -0.40 l
+-5.56 -0.66 l
+-5.37 -0.92 l
+-5.13 -1.16 l
+-4.82 -1.39 l
+-4.48 -1.61 l
+-4.07 -1.81 l
+-3.62 -1.99 l
+-3.13 -2.15 l
+-2.62 -2.27 l
+-2.06 -2.39 l
+-1.49 -2.47 l
+-0.90 -2.53 l
+-0.30 -2.55 l
+0.30 -2.56 l
+0.90 -2.53 l
+1.49 -2.47 l
+2.06 -2.38 l
+2.62 -2.28 l
+3.13 -2.15 l
+3.62 -1.99 l
+4.07 -1.81 l
+4.48 -1.60 l
+4.82 -1.40 l
+5.13 -1.16 l
+5.37 -0.92 l
+5.56 -0.66 l
+5.69 -0.40 l
+5.74 -0.13 l
+5.75 0.13 l
+5.69 0.40 l
+5.56 0.66 l
+5.37 0.92 l
+5.13 1.16 l
+4.82 1.40 l
+4.48 1.60 l
+4.07 1.81 l
+3.62 1.99 l
+3.13 2.15 l
+2.62 2.28 l
+2.06 2.38 l
+1.49 2.47 l
+0.90 2.53 l
+0.30 2.56 l
+cp p3
+np
+ 270.97 254.04 m
+-0.30 2.56 l
+-0.90 2.53 l
+-1.49 2.47 l
+-2.06 2.38 l
+-2.61 2.28 l
+-3.14 2.15 l
+-3.62 1.99 l
+-4.07 1.81 l
+-4.47 1.60 l
+-4.83 1.40 l
+-5.13 1.16 l
+-5.37 0.92 l
+-5.56 0.66 l
+-5.68 0.40 l
+-5.75 0.13 l
+-5.75 -0.13 l
+-5.68 -0.40 l
+-5.56 -0.66 l
+-5.37 -0.92 l
+-5.13 -1.16 l
+-4.83 -1.40 l
+-4.47 -1.60 l
+-4.07 -1.81 l
+-3.62 -1.99 l
+-3.14 -2.15 l
+-2.61 -2.28 l
+-2.06 -2.38 l
+-1.49 -2.47 l
+-0.90 -2.53 l
+-0.31 -2.56 l
+0.31 -2.55 l
+0.90 -2.53 l
+1.49 -2.47 l
+2.06 -2.39 l
+2.61 -2.27 l
+3.14 -2.15 l
+3.62 -1.99 l
+4.07 -1.81 l
+4.47 -1.61 l
+4.83 -1.39 l
+5.13 -1.16 l
+5.37 -0.92 l
+5.56 -0.66 l
+5.68 -0.40 l
+5.75 -0.13 l
+5.75 0.13 l
+5.68 0.40 l
+5.56 0.66 l
+5.37 0.92 l
+5.13 1.16 l
+4.83 1.39 l
+4.47 1.61 l
+4.07 1.81 l
+3.62 1.99 l
+3.14 2.15 l
+2.61 2.27 l
+2.06 2.39 l
+1.49 2.47 l
+0.90 2.53 l
+0.30 2.55 l
+cp p3
+np
+ 224.71 178.93 m
+-0.30 2.56 l
+-0.90 2.52 l
+-1.49 2.47 l
+-2.06 2.39 l
+-2.62 2.28 l
+-3.13 2.15 l
+-3.62 1.99 l
+-4.07 1.80 l
+-4.48 1.61 l
+-4.82 1.40 l
+-5.13 1.16 l
+-5.37 0.91 l
+-5.56 0.67 l
+-5.69 0.40 l
+-5.74 0.13 l
+-5.75 -0.13 l
+-5.69 -0.40 l
+-5.56 -0.67 l
+-5.37 -0.91 l
+-5.13 -1.16 l
+-4.82 -1.40 l
+-4.48 -1.61 l
+-4.07 -1.80 l
+-3.62 -1.99 l
+-3.13 -2.15 l
+-2.62 -2.28 l
+-2.06 -2.39 l
+-1.49 -2.47 l
+-0.90 -2.52 l
+-0.30 -2.56 l
+0.30 -2.55 l
+0.90 -2.53 l
+1.49 -2.47 l
+2.06 -2.39 l
+2.62 -2.28 l
+3.13 -2.14 l
+3.62 -1.99 l
+4.07 -1.81 l
+4.48 -1.61 l
+4.82 -1.39 l
+5.13 -1.16 l
+5.37 -0.92 l
+5.56 -0.66 l
+5.69 -0.40 l
+5.75 -0.13 l
+5.74 0.13 l
+5.69 0.40 l
+5.56 0.66 l
+5.37 0.92 l
+5.13 1.16 l
+4.82 1.39 l
+4.48 1.61 l
+4.07 1.81 l
+3.62 1.99 l
+3.13 2.14 l
+2.62 2.28 l
+2.06 2.39 l
+1.49 2.47 l
+0.90 2.53 l
+0.30 2.55 l
+cp p3
+np
+ 590.83 404.27 m
+-0.30 2.55 l
+-0.90 2.53 l
+-1.49 2.47 l
+-2.06 2.39 l
+-2.62 2.28 l
+-3.13 2.14 l
+-3.62 1.99 l
+-4.07 1.81 l
+-4.48 1.61 l
+-4.82 1.39 l
+-5.13 1.16 l
+-5.37 0.92 l
+-5.56 0.66 l
+-5.69 0.40 l
+-5.75 0.13 l
+-5.74 -0.13 l
+-5.69 -0.40 l
+-5.56 -0.66 l
+-5.37 -0.92 l
+-5.13 -1.16 l
+-4.82 -1.39 l
+-4.48 -1.61 l
+-4.07 -1.81 l
+-3.62 -1.99 l
+-3.13 -2.14 l
+-2.62 -2.28 l
+-2.06 -2.39 l
+-1.49 -2.47 l
+-0.90 -2.53 l
+-0.30 -2.55 l
+0.30 -2.56 l
+0.90 -2.52 l
+1.49 -2.47 l
+2.06 -2.39 l
+2.62 -2.28 l
+3.13 -2.15 l
+3.62 -1.99 l
+4.07 -1.80 l
+4.48 -1.61 l
+4.82 -1.40 l
+5.13 -1.16 l
+5.37 -0.91 l
+5.56 -0.67 l
+5.69 -0.40 l
+5.74 -0.13 l
+5.75 0.13 l
+5.69 0.40 l
+5.56 0.67 l
+5.37 0.91 l
+5.13 1.16 l
+4.82 1.40 l
+4.48 1.61 l
+4.07 1.80 l
+3.62 1.99 l
+3.13 2.15 l
+2.62 2.28 l
+2.06 2.39 l
+1.49 2.47 l
+0.90 2.52 l
+0.30 2.56 l
+cp p3
+np
+ 504.40 329.16 m
+-0.30 2.55 l
+-0.90 2.53 l
+-1.49 2.47 l
+-2.06 2.39 l
+-2.62 2.27 l
+-3.13 2.15 l
+-3.62 1.99 l
+-4.07 1.81 l
+-4.48 1.61 l
+-4.82 1.39 l
+-5.13 1.16 l
+-5.37 0.92 l
+-5.56 0.66 l
+-5.69 0.40 l
+-5.75 0.13 l
+-5.74 -0.13 l
+-5.69 -0.40 l
+-5.56 -0.66 l
+-5.37 -0.92 l
+-5.13 -1.16 l
+-4.82 -1.39 l
+-4.48 -1.61 l
+-4.07 -1.81 l
+-3.62 -1.99 l
+-3.13 -2.15 l
+-2.62 -2.27 l
+-2.06 -2.39 l
+-1.49 -2.47 l
+-0.90 -2.53 l
+-0.30 -2.55 l
+0.30 -2.56 l
+0.90 -2.53 l
+1.49 -2.47 l
+2.06 -2.38 l
+2.62 -2.28 l
+3.13 -2.15 l
+3.62 -1.99 l
+4.07 -1.81 l
+4.48 -1.60 l
+4.82 -1.40 l
+5.13 -1.16 l
+5.37 -0.92 l
+5.56 -0.66 l
+5.69 -0.40 l
+5.74 -0.13 l
+5.75 0.13 l
+5.69 0.40 l
+5.56 0.66 l
+5.37 0.92 l
+5.13 1.16 l
+4.82 1.40 l
+4.48 1.60 l
+4.07 1.81 l
+3.62 1.99 l
+3.13 2.15 l
+2.62 2.28 l
+2.06 2.38 l
+1.49 2.47 l
+0.90 2.53 l
+0.30 2.56 l
+cp p3
+np
+ 457.71 254.04 m
+-0.30 2.56 l
+-0.90 2.53 l
+-1.49 2.47 l
+-2.06 2.38 l
+-2.61 2.28 l
+-3.14 2.15 l
+-3.62 1.99 l
+-4.07 1.81 l
+-4.47 1.60 l
+-4.83 1.40 l
+-5.13 1.16 l
+-5.37 0.92 l
+-5.56 0.66 l
+-5.68 0.40 l
+-5.75 0.13 l
+-5.75 -0.13 l
+-5.68 -0.40 l
+-5.56 -0.66 l
+-5.37 -0.92 l
+-5.13 -1.16 l
+-4.83 -1.40 l
+-4.47 -1.60 l
+-4.07 -1.81 l
+-3.62 -1.99 l
+-3.14 -2.15 l
+-2.61 -2.28 l
+-2.06 -2.38 l
+-1.49 -2.47 l
+-0.90 -2.53 l
+-0.31 -2.56 l
+0.31 -2.55 l
+0.90 -2.53 l
+1.49 -2.47 l
+2.06 -2.39 l
+2.61 -2.27 l
+3.14 -2.15 l
+3.62 -1.99 l
+4.07 -1.81 l
+4.47 -1.61 l
+4.83 -1.39 l
+5.13 -1.16 l
+5.37 -0.92 l
+5.56 -0.66 l
+5.68 -0.40 l
+5.75 -0.13 l
+5.75 0.13 l
+5.68 0.40 l
+5.56 0.66 l
+5.37 0.92 l
+5.13 1.16 l
+4.83 1.39 l
+4.47 1.61 l
+4.07 1.81 l
+3.62 1.99 l
+3.14 2.15 l
+2.61 2.27 l
+2.06 2.39 l
+1.49 2.47 l
+0.90 2.53 l
+0.30 2.55 l
+cp p3
+np
+ 503.98 178.93 m
+-0.30 2.56 l
+-0.90 2.52 l
+-1.49 2.47 l
+-2.07 2.39 l
+-2.61 2.28 l
+-3.13 2.15 l
+-3.62 1.99 l
+-4.07 1.80 l
+-4.48 1.61 l
+-4.82 1.40 l
+-5.13 1.16 l
+-5.38 0.91 l
+-5.55 0.67 l
+-5.69 0.40 l
+-5.75 0.13 l
+-5.74 -0.13 l
+-5.69 -0.40 l
+-5.56 -0.67 l
+-5.37 -0.91 l
+-5.13 -1.16 l
+-4.83 -1.40 l
+-4.47 -1.61 l
+-4.07 -1.80 l
+-3.62 -1.99 l
+-3.13 -2.15 l
+-2.62 -2.28 l
+-2.06 -2.39 l
+-1.49 -2.47 l
+-0.90 -2.52 l
+-0.30 -2.56 l
+0.30 -2.55 l
+0.90 -2.53 l
+1.49 -2.47 l
+2.06 -2.39 l
+2.62 -2.28 l
+3.13 -2.14 l
+3.62 -1.99 l
+4.07 -1.81 l
+4.47 -1.61 l
+4.83 -1.39 l
+5.13 -1.16 l
+5.37 -0.92 l
+5.56 -0.66 l
+5.69 -0.40 l
+5.74 -0.13 l
+5.75 0.13 l
+5.69 0.40 l
+5.55 0.66 l
+5.38 0.92 l
+5.13 1.16 l
+4.82 1.39 l
+4.48 1.61 l
+4.07 1.81 l
+3.62 1.99 l
+3.13 2.14 l
+2.61 2.28 l
+2.07 2.39 l
+1.49 2.47 l
+0.90 2.53 l
+0.30 2.55 l
+cp p3
+np
+ 677.26 329.16 m
+-0.30 2.55 l
+-0.90 2.53 l
+-1.49 2.47 l
+-2.06 2.39 l
+-2.62 2.27 l
+-3.13 2.15 l
+-3.62 1.99 l
+-4.07 1.81 l
+-4.48 1.61 l
+-4.82 1.39 l
+-5.13 1.16 l
+-5.37 0.92 l
+-5.56 0.66 l
+-5.69 0.40 l
+-5.75 0.13 l
+-5.74 -0.13 l
+-5.69 -0.40 l
+-5.56 -0.66 l
+-5.37 -0.92 l
+-5.13 -1.16 l
+-4.82 -1.39 l
+-4.48 -1.61 l
+-4.07 -1.81 l
+-3.62 -1.99 l
+-3.13 -2.15 l
+-2.62 -2.27 l
+-2.06 -2.39 l
+-1.49 -2.47 l
+-0.90 -2.53 l
+-0.30 -2.55 l
+0.30 -2.56 l
+0.90 -2.53 l
+1.49 -2.47 l
+2.06 -2.38 l
+2.62 -2.28 l
+3.13 -2.15 l
+3.62 -1.99 l
+4.07 -1.81 l
+4.48 -1.60 l
+4.82 -1.40 l
+5.13 -1.16 l
+5.37 -0.92 l
+5.56 -0.66 l
+5.69 -0.40 l
+5.74 -0.13 l
+5.75 0.13 l
+5.69 0.40 l
+5.56 0.66 l
+5.37 0.92 l
+5.13 1.16 l
+4.82 1.40 l
+4.48 1.60 l
+4.07 1.81 l
+3.62 1.99 l
+3.13 2.15 l
+2.62 2.28 l
+2.06 2.38 l
+1.49 2.47 l
+0.90 2.53 l
+0.30 2.56 l
+cp p3
+np
+ 208.10 346.44 m
+0 -34.56 l
+-77.76 0 l
+0 34.56 l
+cp p3
+np
+ 166.55 121.10 m
+0 -34.56 l
+-77.76 0 l
+0 34.56 l
+cp p3
+np
+ 250.66 121.10 m
+0 -34.56 l
+-77.76 0 l
+0 34.56 l
+cp p3
+np
+ 301.13 196.21 m
+0 -34.56 l
+-77.76 0 l
+0 34.56 l
+cp p3
+np
+ 348.24 271.32 m
+0 -34.56 l
+-77.76 0 l
+0 34.56 l
+cp p3
+np
+ 395.34 196.21 m
+0 -34.56 l
+-77.76 0 l
+0 34.56 l
+cp p3
+np
+ 445.82 121.10 m
+0 -34.56 l
+-77.76 0 l
+0 34.56 l
+cp p3
+np
+ 529.93 121.10 m
+0 -34.56 l
+-77.76 0 l
+0 34.56 l
+cp p3
+np
+ 534.98 271.32 m
+0 -34.56 l
+-77.76 0 l
+0 34.56 l
+cp p3
+np
+ 619.10 271.32 m
+0 -34.56 l
+-77.76 0 l
+0 34.56 l
+cp p3
+np
+ 703.21 271.32 m
+0 -34.56 l
+-77.76 0 l
+0 34.56 l
+cp p3
+375.90 489.47 (0.80232) .5 0 t
+375.90 475.07 (n=715178) .5 0 t
+215.95 414.36 (0.7064) .5 0 t
+215.95 399.96 (n=246457) .5 0 t
+169.22 339.25 (0.64273) .5 0 t
+169.22 324.85 (n=108151) .5 0 t
+262.67 339.25 (0.75619) .5 0 t
+262.67 324.85 (n=138306) .5 0 t
+215.99 264.14 (0.73397) .5 0 t
+215.99 249.74 (n=117945) .5 0 t
+169.73 189.03 (0.69391) .5 0 t
+169.73 174.63 (n=84150) .5 0 t
+127.67 113.91 (0.65266) .5 0 t
+127.67 99.51 (n=46452) .5 0 t
+211.78 113.91 (0.74474) .5 0 t
+211.78 99.51 (n=37698) .5 0 t
+262.25 189.03 (0.8337) .5 0 t
+262.25 174.63 (n=33795) .5 0 t
+309.36 264.14 (0.88492) .5 0 t
+309.36 249.74 (n=20361) .5 0 t
+535.84 414.36 (0.85276) .5 0 t
+535.84 399.96 (n=468721) .5 0 t
+449.41 339.25 (0.81899) .5 0 t
+449.41 324.85 (n=300479) .5 0 t
+402.73 264.14 (0.73671) .5 0 t
+402.73 249.74 (n=109506) .5 0 t
+356.46 189.03 (0.70255) .5 0 t
+356.46 174.63 (n=83022) .5 0 t
+448.99 189.03 (0.84381) .5 0 t
+448.99 174.63 (n=26484) .5 0 t
+406.94 113.91 (0.7862) .5 0 t
+406.94 99.51 (n=17931) .5 0 t
+491.05 113.91 (0.9646) .5 0 t
+491.05 99.51 (n=8553) .5 0 t
+496.10 264.14 (0.86616) .5 0 t
+496.10 249.74 (n=190973) .5 0 t
+622.27 339.25 (0.91306) .5 0 t
+622.27 324.85 (n=168242) .5 0 t
+580.22 264.14 (0.89123) .5 0 t
+580.22 249.74 (n=119422) .5 0 t
+664.33 264.14 (0.96648) .5 0 t
+664.33 249.74 (n=48820) .5 0 t
+18.00 18.00 774.00 594.00 cl
+/Font2 findfont 14 s
+0 0 0 srgb
+282.60 559.45 (Endpoint = area_under_r) 0 ta
+-0.280 (oc_cur) tb
+0.140 (ve) tb gr
+ep
+%%Trailer
+%%Pages: 1
+%%EOF
