@@ -7,29 +7,33 @@ library(DT)
 
 shinyUI(dashboardPage(
     #Header Title
-    dashboardHeader(title = "ML.PlanneR", dropdownMenuOutput("messageMenu")),
+    dashboardHeader(title = tags$img(src='logo3.png'), dropdownMenuOutput("messageMenu")),
 
     # ------------- Sidebar  -------------------
     dashboardSidebar(
         sidebarMenu(
             id = "sideBar",
-            menuItem(
-                "Setup ML Plan",
-                tabName = "add",
-                icon = icon("plus-circle")
-            ),
-            menuItem(
-                "Generate ML Pipes",
+            menuItem("Setup Plan",
+                     tabName = "add",
+                     icon = icon("cog")),
+
+            menuItem("Generate Pipes",
                 tabName = "pipes",
-                icon = icon("wrench")
+                icon = icon("cubes")
             ),
-            menuItem("Flag & Clean", tabName = "flag", icon = icon("flag")),
-            menuItem(
-                "Artifacts & Documentation",
-                tabName = "document",
-                icon = icon("file")
-            ),
-            menuItem("Citations", tabName = "citTab", icon = icon("bookmark"))
+
+            menuItem("Play Plan",
+                     tabName = "flag",
+                     icon = icon("play")),
+
+            menuItem("Evaluate Plan",
+                     tabName = "document",
+                     icon = icon("vial")),
+
+            menuItem("Download Artifacts",
+                tabName = "citTab",
+                icon = icon("file-download")
+            )
         )
     ),
 
@@ -38,7 +42,9 @@ shinyUI(dashboardPage(
     dashboardBody(
         tags$head(
             tags$link(rel = "stylesheet", type = "text/css", href = "style.css"),
-            tags$link(rel = "stylesheet", type = "text/css", href = "checkbox.css")
+            tags$link(rel = "stylesheet", type = "text/css", href = "checkbox.css"),
+            tags$link(rel = "stylesheet", type = "text/css", href = "override.css"),
+            tags$link(rel = "stylesheet", href = "https://fonts.googleapis.com/css?family=Merienda")
         ),
         useShinyjs(),
 
@@ -61,7 +67,7 @@ shinyUI(dashboardPage(
                                                 "Select Learning Type",
                                                 value = "select.type",
 
-                                                div(class = "secondaryHeaders", h3("ML Plan: Select Learning Type")),
+                                                div(class = "secondaryHeaders", h3("Select Learning Type of ML Plan:")),
                                                 div(
                                                     # id = "queryDatabaseDiv",
                                                     # class = "activeButton",
@@ -133,49 +139,48 @@ shinyUI(dashboardPage(
 
 
 
-        # ------------- Add Data Module -------------------
-        tabItem("pipes",
-                fluidRow(column(
-                    12,
-                    h1("Add Machine Learning Pipes"),
-                    column(
-                        12,
-                        tabsetPanel(
-                            type = "tabs",
-                            id = "mlpipes",
+                 # ------------- Add Data Module -------------------
+                 tabItem("pipes",
+                         fluidRow(
+                             column(
+                                 12,
+                                 h1("Add Machine Learning Pipes"),
+                                 column(
+                                     12,
+                                     tabsetPanel(
+                                         type = "tabs",
+                                         id = "mlpipes",
 
-                            # ------------- DB Module -------------------
+                                         # ------------- DB Module -------------------
 
-                            tabPanel(
-                                "Select Pipes",
-                                value = "data.split",
-                                div(class = "secondaryHeaders", h3("Select Machine Learning Pipes")),
+                                         tabPanel(
+                                             "Select Pipes",
+                                             value = "data.split",
+                                             div(class = "secondaryHeaders", h3("Select Machine Learning Pipes")),
 
-                                sliderInput(
-                                    "slider2",
-                                    label = h3("Train - Test percentages"),
-                                    min = 0,
-                                    max = 100,
-                                    value = c(60),
-                                    round = 10
-                                ),
+                                             sliderInput(
+                                                 "slider2",
+                                                 label = h3("Train - Test percentages"),
+                                                 min = 0,
+                                                 max = 100,
+                                                 value = c(60),
+                                                 round = 10
+                                             ),
 
-                                verbatimTextOutput("split.range"),
+                                             verbatimTextOutput("split.range"),
 
-                                uiOutput("qualityChecks")
+                                             uiOutput("qualityChecks")
 
-                            )
+                                         )
 
-                        ),
-                        div(
-                            id = "dataToConfigureDiv",
-                            actionButton("dataToConfigure", "Next: Train Models")
-                        )
-                    )
+                                     ),
+                                     div(id = "dataToConfigureDiv",
+                                         actionButton("dataToConfigure", "Next: Train Models"))
+                                 )
 
-                    # ------------- End of Map/Table Module -------------------
-                )))
-        )
+                                 # ------------- End of Map/Table Module -------------------
+                             )
+                         )))
     )
 
 ))
