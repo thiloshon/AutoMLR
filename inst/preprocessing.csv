@@ -1,0 +1,10 @@
+processing,label,applied_on,data-dependent
+removeConstantFeatures,Removing features with constant values,data,TRUE
+normalizeFeatures,Normalizing numerical features,data,TRUE
+mergeSmallFactorLevels,Merging small factors into one big factor level,data,TRUE
+capLargeValues,Cutting off large values like 'infinity',data,TRUE
+createDummyFeatures,Creating dummy features for factors,data,TRUE
+dropFeatures,Removing columns,data,TRUE
+factoring,Factoring features with encoding,data,TRUE
+binning,Binning continous variables to levels,data,TRUE
+na.imputing,Imputing missing values,data,TRUE

@@ -20,8 +20,10 @@ suggest_learner <-
         scoreboard <- scoreboard[scoreboard$type == type | scoreboard$type == "both", ]
 
 
-        scoreboard$expected.accuracy <-
-            suggest_learner_meta(dataset, type = type, predictor = predictor, scoreboard$meta_name)
+        #scoreboard$expected.accuracy <-
+            #suggest_learner_meta(dataset, type = type, predictor = predictor, scoreboard$meta_name)
+
+        print(scoreboard)
 
 
         scoreboard$sum <- rowSums(scoreboard[, 6:ncol(scoreboard)])

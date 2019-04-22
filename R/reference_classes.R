@@ -10,7 +10,6 @@ MLPlan <-
             target = "character",
             data.meta = "list",
             ml.pipelines = "list"
-
         ),
         methods = list(
             initialize = function(type = "classification") {
@@ -159,9 +158,32 @@ MLPlan <-
 
 
             test = function() {
+                # for (pipe in .self$ml.pipelines) {
+                #     print(pipe$mlr.model[[1]]$aggr)
+                # }
+
+            },
+
+            benchmark = function() {
+                algorithms <- read.csv("C:/Users/Thiloshon/RProjects/rautoalgo/inst/algorithms scoring.csv")
+
+                benchmark <- data.frame()
+
+                print("LOL")
                 for (pipe in .self$ml.pipelines) {
-                    print(pipe$mlr.model[[1]]$aggr)
+                    temp <- pipe$mlr.model[[1]]$aggr
+                    temp$algo  <- pipe$mlr.model[[1]]$task.id
+
+                    temp$name <- algorithms[which(algorithms$algorithms_id == pipe$mlr.model[[1]]$task.id), 2]
+
+                    benchmark <- rbind(benchmark, temp, stringsAsFactors = F)
+
+
+                    # print(calculateConfusionMatrix(pipe$mlr.model[[1]]$pred))
+
+
                 }
+                return(benchmark)
 
             },
 

@@ -20,7 +20,7 @@ shinyServer(function(input, output, session) {
             dataStore$mlPlan <<- MLPlan("regression")
         }
 
-        showNotification("Recieved Type!", duration = 2)
+
         updateTabsetPanel(session, "mlplan", selected = "select.data")
     })
 
@@ -77,13 +77,17 @@ shinyServer(function(input, output, session) {
         ggplot(dataStore$mlPlan$data) +
             geom_bar(aes(dataStore$mlPlan$data[, as.numeric(input$selected.target)])) +
             labs(title = "Count by classes") +
-            xlab("Classes")
+            xlab("Classes") + theme_linedraw() + theme(
+                plot.background = element_rect(fill = "#323232") ,
+                panel.background = element_rect(fill = "#323232")
+            )
 
 
     })
 
     output$split.range <- renderPrint({
-        train <- as.integer(input$slider2 * nrow(dataStore$mlPlan$data) / 100)
+        train <-
+            as.integer(input$slider2 * nrow(dataStore$mlPlan$data) / 100)
         test <- nrow(dataStore$mlPlan$data) - train
 
         # dataStore$mlPlan$addSplit(train)
@@ -92,15 +96,20 @@ shinyServer(function(input, output, session) {
 
         paste("Train Data : ", train,
               " and Test Data : ", test)
-        })
+    })
 
 
     output$qualityChecks <- renderUI({
         components <- list()
 
-        algorithms <- suggest_learner(dataStore$mlPlan$data, dataStore$learning.type, dataStore$mlPlan$target)
+        algorithms <-
+            suggest_learner(dataStore$mlPlan$data,
+                            dataStore$learning.type,
+                            dataStore$mlPlan$target)
 
-        for (i in 1:5) {
+        print(algorithms)
+
+        for (i in 1:10) {
             components[[i]] <- tagList(
                 HTML(
                     paste(
@@ -115,22 +124,39 @@ shinyServer(function(input, output, session) {
                     h4(algorithms$algorithms_name[i]),
 
                     div(class = "checksListTopic col-sm-3", p("Preprocessing: ")),
-                    div(
-                        class = "checksListTitle",
-                        p("factoring, binning, na.imputing")
-                    ),
+                    div(class = "checksListTitle",
+                        p(ifelse(
+                            i == 4 || i == 8,
+                            c(
+                                "Removing features with constant values,
+                                Normalizing numerical features,
+                                Merging small factors into one big factor level,
+                                Cutting off large values like 'infinity',
+                                Creating dummy features for factors,
+                                Factoring features with encoding,
+                                Binning continous variables to levels"
+                            ),
+                            c(
+                                "Removing features with constant values,
+                                Normalizing numerical features,
+                                Merging small factors into one big factor level,
+                                Cutting off large values like 'infinity',
+                                Creating dummy features for factors,
+                                Removing columns,
+                                Factoring features with encoding,
+                                Binning continous variables to levels,
+                                Imputing missing values"
+                            )
+                        ))
+                        ),
 
                     div(class = "checksListTopic col-sm-3", p("Train / Test Split: ")),
-                    div(
-                        class = "checksListTitle",
-                        p("70/30")
-                    ),
+                    div(class = "checksListTitle",
+                        p("80 / 20")),
 
                     div(class = "checksListTopic col-sm-3", p("Evaluation Metric")),
-                    div(
-                        class = "checksListTitle",
-                        p("Area Under Curve, Accuracy")
-                    )
+                    div(class = "checksListTitle",
+                        p("Accuracy"))
                 ),
                 br(),
                 br()
@@ -150,7 +176,10 @@ shinyServer(function(input, output, session) {
     })
 
     observeEvent(input$dataToConfigure, {
-        prefix <- ifelse(dataStore$learning.type == "classification", "classif", "regr")
+        prefix <-
+            ifelse(dataStore$learning.type == "classification",
+                   "classif",
+                   "regr")
 
         for (algo in input$algoSelect) {
             temp <- gsub("^\\s+|\\s+$", "", algo)
@@ -159,11 +188,79 @@ shinyServer(function(input, output, session) {
         }
 
         dataStore$mlPlan$split()
-        dataStore$mlPlan$train()
+
+        updateTabItems(session, "sideBar", "play")
+
+        # dataStore$mlPlan$train()
         #dataStore$mlPlan$test()
 
         #dataStore$mlPlan$printSelf()
     })
+
+    observeEvent(input$train.models, {
+
+        #dataStore$mlPlan$test()
+
+        #dataStore$mlPlan$printSelf()
+    })
+
+    output$evaluations <- renderUI({
+
+        dataStore$mlPlan$train()
+        data <- dataStore$mlPlan$benchmark()
+
+        data$index <- c(1:nrow(data))
+
+        data <- data[order(-data$acc.test.mean),]
+
+        print(data)
+
+        components <- list()
+
+        for (i in 1:nrow(data)) {
+            components[[i]] <- tagList(
+                HTML(
+                    paste(
+                        "<input type=checkbox
+                        name=trainSelect value=",
+                        data$index[i],
+                        ">"
+                    )
+                ),
+                div(
+                    class = "checksListContent",
+                    h4(data$name[i]),
+
+                    div(class = "checksListTopic col-sm-3", p("Out of Sample Accuracy: ")),
+                    div(class = "checksListTitle",
+                        p(as.numeric(data$acc.test.mean[i]) * 100)
+                    ),
+
+                    div(class = "checksListTopic col-sm-3", p("Training Duration")),
+                    div(class = "checksListTitle",
+                        p(paste(data$timetrain.test.mean[i], "Seconds")))
+                ),
+                br(),
+                br()
+
+                            )
+        }
+
+        return(
+            div(
+                id = "trainSelect",
+                tags$br(),
+                tags$br(),
+                column(width = 12,
+                       components)
+            )
+        )
+
+
+    })
+
+
+
 
 
 

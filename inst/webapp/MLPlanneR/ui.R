@@ -23,7 +23,7 @@ shinyUI(dashboardPage(
             ),
 
             menuItem("Play Plan",
-                     tabName = "flag",
+                     tabName = "play",
                      icon = icon("play")),
 
             menuItem("Evaluate Plan",
@@ -158,16 +158,16 @@ shinyUI(dashboardPage(
                                              value = "data.split",
                                              div(class = "secondaryHeaders", h3("Select Machine Learning Pipes")),
 
-                                             sliderInput(
-                                                 "slider2",
-                                                 label = h3("Train - Test percentages"),
-                                                 min = 0,
-                                                 max = 100,
-                                                 value = c(60),
-                                                 round = 10
-                                             ),
-
-                                             verbatimTextOutput("split.range"),
+                                             # sliderInput(
+                                             #     "slider2",
+                                             #     label = h3("Train - Test percentages"),
+                                             #     min = 0,
+                                             #     max = 100,
+                                             #     value = c(60),
+                                             #     round = 10
+                                             # ),
+                                             #
+                                             # verbatimTextOutput("split.range"),
 
                                              uiOutput("qualityChecks")
 
@@ -180,7 +180,27 @@ shinyUI(dashboardPage(
 
                                  # ------------- End of Map/Table Module -------------------
                              )
-                         )))
+                         )),
+
+                 tabItem("play",
+                         fluidRow(
+                             column(
+                                 12,
+                                 h1("Train Machine Learning Pipes"),
+                                 column(
+                                     12,
+
+                                     uiOutput("evaluations"),
+
+                                     div(id = "dataToConfigureDiv",
+                                         actionButton("train.models", "Next: Download Artifacts"),
+                                         actionButton("train.models", "Breed Selected Models "))
+                                 )
+
+                                 # ------------- End of Map/Table Module -------------------
+                             )
+                         ))
+                 )
     )
 
 ))
