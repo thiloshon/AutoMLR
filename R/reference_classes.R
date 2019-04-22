@@ -298,26 +298,40 @@ PipeLine <-
 
             },
             printSelf = function() {
-                print("Machine Learning Pipeline Object")
-                print("ID: ")
-                print(.self$id)
-                print("Learner: ")
-                print(.self$learner)
-                print("Preprocessing List: ")
-                print(.self$preprocessing)
-                print("Cross Validation: ")
-                print(.self$cross.validation)
-                print("Data: ")
-                print(.self$data)
-                print("Train Split: ")
-                print(.self$train.split)
+                # print(paste("ID:", .self$id))
+                # print(paste("Learner:", .self$learner))
 
-                print("Task: ")
+                cat("Machine Learning Pipeline Object")
+                cat('\n')
+                cat('\n')
+
+                cat("ID: ")
+                cat(.self$id)
+                cat('\n')
+
+                cat("Learning Algorithm: ")
+                print(.self$learner)
+
+                cat("Preprocessing List: ")
+                print(.self$preprocessing)
+                cat("")
+
+                cat("Train, Test, Cross Validation Split: ")
+                print(.self$train.split)
+                cat("")
+
+
+                cat("#####  MLR Task: ##### ")
                 print(.self$mlr.task)
-                print("Learner: ")
+                cat("")
+
+                cat("#####  MLR Learner: ##### ")
                 print(.self$mlr.learner)
-                print("Model: ")
+                cat("")
+
+                cat("#####  MLR Model: ##### ")
                 print(.self$mlr.model)
+                cat("")
             }
         )
     )

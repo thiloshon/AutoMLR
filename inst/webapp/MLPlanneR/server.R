@@ -10,6 +10,27 @@ shinyServer(function(input, output, session) {
             inputReceived = FALSE
         )
 
+    # showModal(modalDialog(
+    #     title = h3("Welcome to AUTOMLR!"),
+    #     helpText(
+    #         "AUTOmated Machine Learning in R"
+    #     ),
+    #     helpText(
+    #         "Click the tabs in the left and follow the instructions to train models."
+    #     ),
+    #     img(src = "logo3.png", align = "center"),
+    #
+    #     p(
+    #         "GPL-3 ©Thiloshon Nagarajah, Guhanathan Poravi (2019).
+    #         automlr: Automated Machine Leaning in R. R package version 0.0.018"
+    #     ),
+    #     p(
+    #         "Contribute: ",
+    #         a("https://github.com/thiloshon/rautoalgo", href = "https://github.com/thiloshon/rautoalgo")
+    #     )
+    #
+    #     ))
+
 
     observeEvent(input$deploy.classification, {
         if (input$deploy.classification[[1]] > 0) {
@@ -199,10 +220,26 @@ shinyServer(function(input, output, session) {
 
     observeEvent(input$train.models, {
 
-        #dataStore$mlPlan$test()
 
-        #dataStore$mlPlan$printSelf()
+        updateTabItems(session, "sideBar", "document")
+        generate_detailed_report(dataStore)
+
     })
+
+    generate_detailed_report <-
+        function(dataStore) {
+            try(rmarkdown::render(
+                file.path("C:/Users/Thiloshon/RProjects/rautoalgo/inst/rmd/generateDetailedReport.Rmd"),
+                c("pdf_document", "md_document"),
+                quiet = T,
+                output_dir = 'Report'
+            ))
+
+            print(tempdir())
+            message(paste("Saved generated reports to '", tempdir(), sep = ""))
+        }
+
+
 
     output$evaluations <- renderUI({
 
@@ -261,7 +298,53 @@ shinyServer(function(input, output, session) {
 
 
 
+    output$documentContentUI <- renderUI({
+        input$flagButton
+        tagList(
+            tabsetPanel(
+                type = "tabs",
+                tabPanel(
+                    "Data",
+                    div(class = "secondaryHeaders", h3("Artifact 01: Input Data")),
+                    downloadButton("downloadInput", "Download Input Data"),
+                    br(),
+                    br(),
+                    DT::renderDataTable(dataStore$mlPlan$data, width = 300)
+                ),
+                tabPanel(
+                    "Models",
+                    div(class = "secondaryHeaders", h3(
+                        "Artifact 02: Machine Learning Models"
+                    )),
+                    downloadButton("downloadFlagged", "Download Model"),
+                    br(),
+                    br()
+                ),
 
+                tabPanel(
+                    "Report",
+                    div(class = "secondaryHeaders", h3(
+                        "Artifact 03: Extensive Machine Learning Report"
+                    )),
+
+                    downloadButton("downloadShortReport", "Download Report in PDF"),
+                    br(),
+                    br(),
+                    includeMarkdown("Report/generateDetailedReport.md")
+                ),
+
+
+                tabPanel(
+                    "Source Code",
+                    div(class = "secondaryHeaders", h3(
+                        "Artifact 04: Workflow Source Code"
+                    )),
+                    downloadButton("downloadCode", "Download Code"),
+                    br()
+                )
+            )
+        )
+    })
 
 
 

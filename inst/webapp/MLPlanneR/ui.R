@@ -27,11 +27,11 @@ shinyUI(dashboardPage(
                      icon = icon("play")),
 
             menuItem("Evaluate Plan",
-                     tabName = "document",
+                     tabName = "breed",
                      icon = icon("vial")),
 
             menuItem("Download Artifacts",
-                tabName = "citTab",
+                tabName = "document",
                 icon = icon("file-download")
             )
         )
@@ -199,7 +199,19 @@ shinyUI(dashboardPage(
 
                                  # ------------- End of Map/Table Module -------------------
                              )
-                         ))
+                         )),
+
+                 tabItem("document",
+                         fluidRow(column(
+                             12,
+                             column(
+                                 12,
+                                 h1("Artifacts and Reports"),
+                                 br(),
+
+                                 uiOutput("documentContentUI")
+                             )
+                         )))
                  )
     )
 
