@@ -40,7 +40,7 @@ MLPlan <-
                     classes.count <-
                         as.data.frame(table(factored.predictor))
                     classes.count <-
-                        classes.count[order(-classes.count$Freq),]
+                        classes.count[order(-classes.count$Freq), ]
 
                     .self$data.meta$number.of.classes <-
                         nrow(classes.count)
@@ -90,7 +90,7 @@ MLPlan <-
                     pipe$addPreprocessing("mergeSmallFactorLevels")
 
                     for (preproc in pipe$preprocessing) {
-                        if(grepl("~", preproc, fixed = T)){
+                        if (grepl("~", preproc, fixed = T)) {
                             pair <- strsplit(preproc, "~", fixed = T)
                         } else {
 
@@ -144,12 +144,10 @@ MLPlan <-
                         regr.lrn = mlr::makeLearner(pipe$learner)
                         pipe$addMLRLearner(regr.lrn)
 
-                        mod = mlr::resample(
-                            regr.lrn,
-                            regr.task,
-                            pipe$train.split[[1]],
-                            measures = list(mmce, acc, timetrain)
-                        )
+                        mod = mlr::resample(regr.lrn,
+                                            regr.task,
+                                            pipe$train.split[[1]],
+                                            measures = list(mmce, acc, timetrain))
                         pipe$addMLRModel(mod)
 
                     }
@@ -165,7 +163,8 @@ MLPlan <-
             },
 
             benchmark = function() {
-                algorithms <- read.csv("C:/Users/Thiloshon/RProjects/rautoalgo/inst/algorithms scoring.csv")
+                algorithms <-
+                    read.csv("C:/Users/Thiloshon/RProjects/rautoalgo/inst/algorithms scoring.csv")
 
                 benchmark <- data.frame()
 
@@ -174,9 +173,11 @@ MLPlan <-
                     temp <- pipe$mlr.model[[1]]$aggr
                     temp$algo  <- pipe$mlr.model[[1]]$task.id
 
-                    temp$name <- algorithms[which(algorithms$algorithms_id == pipe$mlr.model[[1]]$task.id), 2]
+                    temp$name <-
+                        algorithms[which(algorithms$algorithms_id == pipe$mlr.model[[1]]$task.id), 2]
 
-                    benchmark <- rbind(benchmark, temp, stringsAsFactors = F)
+                    benchmark <-
+                        rbind(benchmark, temp, stringsAsFactors = F)
 
 
                     # print(calculateConfusionMatrix(pipe$mlr.model[[1]]$pred))

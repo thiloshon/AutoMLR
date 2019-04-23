@@ -88,8 +88,8 @@ ML Pipes
     Resample Result
     Task: nnet
     Learner: classif.nnet
-    Aggr perf: mmce.test.mean=0.0000000,acc.test.mean=1.0000000,timetrain.test.mean=0.0000000
-    Runtime: 0.017961
+    Aggr perf: mmce.test.mean=0.0333333,acc.test.mean=0.9666667,timetrain.test.mean=0.0300000
+    Runtime: 0.0668261
 
     ######################## ksvm ########################  
 
@@ -134,8 +134,100 @@ ML Pipes
     Resample Result
     Task: ksvm
     Learner: classif.ksvm
-    Aggr perf: mmce.test.mean=0.0666667,acc.test.mean=0.9333333,timetrain.test.mean=0.0000000
-    Runtime: 0.015955
+    Aggr perf: mmce.test.mean=0.0333333,acc.test.mean=0.9666667,timetrain.test.mean=0.0100000
+    Runtime: 0.067816
+
+    ######################## extraTrees ########################  
+
+    Machine Learning Pipeline Object
+
+    ID: extraTrees
+    Learning Algorithm: [1] "classif.extraTrees"
+    Preprocessing List: character(0)
+    Train, Test, Cross Validation Split: [[1]]
+    Resample description: holdout with 0.60 split rate.
+    Predict: test
+    Stratification: FALSE
+
+    #####  MLR Task: ##### [[1]]
+    Supervised task: extraTrees
+    Type: classif
+    Target: Species
+    Observations: 150
+    Features:
+       numerics     factors     ordered functionals 
+              4           0           0           0 
+    Missings: FALSE
+    Has weights: FALSE
+    Has blocking: FALSE
+    Has coordinates: FALSE
+    Classes: 3
+        setosa versicolor  virginica 
+            50         50         50 
+    Positive class: NA
+
+    #####  MLR Learner: ##### [[1]]
+    Learner classif.extraTrees from package extraTrees
+    Type: classif
+    Name: Extremely Randomized Trees; Short name: extraTrees
+    Class: classif.extraTrees
+    Properties: numerics,weights,twoclass,multiclass,prob
+    Predict-Type: response
+    Hyperparameters: 
+
+
+    #####  MLR Model: ##### [[1]]
+    Resample Result
+    Task: extraTrees
+    Learner: classif.extraTrees
+    Aggr perf: mmce.test.mean=0.0500000,acc.test.mean=0.9500000,timetrain.test.mean=0.0300000
+    Runtime: 0.0837729
+
+    ######################## fnn ########################  
+
+    Machine Learning Pipeline Object
+
+    ID: fnn
+    Learning Algorithm: [1] "classif.fnn"
+    Preprocessing List: character(0)
+    Train, Test, Cross Validation Split: [[1]]
+    Resample description: holdout with 0.60 split rate.
+    Predict: test
+    Stratification: FALSE
+
+    #####  MLR Task: ##### [[1]]
+    Supervised task: fnn
+    Type: classif
+    Target: Species
+    Observations: 150
+    Features:
+       numerics     factors     ordered functionals 
+              4           0           0           0 
+    Missings: FALSE
+    Has weights: FALSE
+    Has blocking: FALSE
+    Has coordinates: FALSE
+    Classes: 3
+        setosa versicolor  virginica 
+            50         50         50 
+    Positive class: NA
+
+    #####  MLR Learner: ##### [[1]]
+    Learner classif.fnn from package FNN
+    Type: classif
+    Name: Fast k-Nearest Neighbour; Short name: fnn
+    Class: classif.fnn
+    Properties: twoclass,multiclass,numerics
+    Predict-Type: response
+    Hyperparameters: 
+
+
+    #####  MLR Model: ##### [[1]]
+    Resample Result
+    Task: fnn
+    Learner: classif.fnn
+    Aggr perf: mmce.test.mean=0.0333333,acc.test.mean=0.9666667,timetrain.test.mean=0.0000000
+    Runtime: 0.0668199
 
 References
 ----------

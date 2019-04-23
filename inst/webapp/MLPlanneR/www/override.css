@@ -158,5 +158,17 @@ table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
 }
 
 .modal-content {
-    background-color: #000;
+background-color: transparent;
+    /* 2a2a2a */
+}
+
+.modal-footer {
+    padding: 15px;
+    text-align: center;
+    border-top: 0px;
+}
+
+.modal-content {
+    -webkit-box-shadow: 0 2px 3px rgba(0,0,0,0);
+    box-shadow: 0 2px 3px rgba(0,0,0,0);
 }

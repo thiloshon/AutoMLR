@@ -10,26 +10,26 @@ shinyServer(function(input, output, session) {
             inputReceived = FALSE
         )
 
-    # showModal(modalDialog(
-    #     title = h3("Welcome to AUTOMLR!"),
-    #     helpText(
-    #         "AUTOmated Machine Learning in R"
-    #     ),
-    #     helpText(
-    #         "Click the tabs in the left and follow the instructions to train models."
-    #     ),
-    #     img(src = "logo3.png", align = "center"),
-    #
-    #     p(
-    #         "GPL-3 ©Thiloshon Nagarajah, Guhanathan Poravi (2019).
-    #         automlr: Automated Machine Leaning in R. R package version 0.0.018"
-    #     ),
-    #     p(
-    #         "Contribute: ",
-    #         a("https://github.com/thiloshon/rautoalgo", href = "https://github.com/thiloshon/rautoalgo")
-    #     )
-    #
-    #     ))
+    showModal(modalDialog(
+        # title = h3("Welcome to AUTOMLR!"),
+        # helpText(
+        #     "AUTOmated Machine Learning in R"
+        # ),
+        # helpText(
+        #     "Click the tabs in the left and follow the instructions to train models."
+        # ),
+        img(src = "82.png", align = "center")
+
+        # p(
+        #     "GPL-3 ©Thiloshon Nagarajah, Guhanathan Poravi (2019).
+        #     automlr: Automated Machine Leaning in R. R package version 0.0.018"
+        # ),
+        # p(
+        #     "Contribute: ",
+        #     a("https://github.com/thiloshon/rautoalgo", href = "https://github.com/thiloshon/rautoalgo")
+        # )
+
+        ))
 
 
     observeEvent(input$deploy.classification, {
@@ -196,6 +196,102 @@ shinyServer(function(input, output, session) {
         )
     })
 
+
+
+    observeEvent(input$breed.models, {
+        updateTabItems(session, "sideBar", "breed")
+    })
+
+
+    output$breedModels <- renderUI({
+        components <- list()
+
+        for (i in 1:5) {
+            components[[i]] <- tagList(
+                HTML(
+                    paste(
+                        "<input type=checkbox
+                        name=algoSelect value=",
+                        i,
+                        ">"
+                    )
+                ),
+                div(
+                    class = "checksListContent",
+                    h4('Neural Net'),
+
+                    div(class = "checksListTopic col-sm-3", p("Preprocessing: ")),
+                    div(class = "checksListTitle",
+                        p(ifelse(
+                            i == 1,
+                            c(
+                                "None"
+                            ),
+                            ifelse(
+                                i == 2,
+                                c(
+                                    "Removing features with constant values,
+                                Normalizing numerical features,
+                                Merging small factors into one big factor level,
+                                Cutting off large values like 'infinity'"
+                                ),
+                                ifelse(
+                                    i == 3,
+                                    c(
+                                        "Creating dummy features for factors,
+                                Removing columns,
+                                Factoring features with encoding,
+                                Binning continous variables to levels,
+                                Imputing missing values"
+                                    ),
+                                    ifelse(
+                                        i == 4,
+                                        c(
+                                            "Normalizing numerical features"
+                                        ),
+                                        c(
+                                            "Removing features with constant values,
+                                Normalizing numerical features,
+                                Merging small factors into one big factor level,
+                                Cutting off large values like 'infinity',
+                                Creating dummy features for factors,
+                                Removing columns,
+                                Factoring features with encoding,
+                                Binning continous variables to levels,
+                                Imputing missing values"
+                                        )
+                                    )
+                                )
+                            )
+
+                        ))
+                        ),
+
+                    div(class = "checksListTopic col-sm-3", p("Train / Test Split: ")),
+                    div(class = "checksListTitle",
+                        p("80 / 20")),
+
+                    div(class = "checksListTopic col-sm-3", p("Evaluation Metric")),
+                    div(class = "checksListTitle",
+                        p("Accuracy"))
+                ),
+                br(),
+                br()
+            )
+        }
+
+        return(
+            div(
+                id = "algoSelect",
+                class = "form-group shiny-input-checkboxgroup shiny-input-container shiny-bound-input",
+                tags$br(),
+                tags$br(),
+                column(width = 12,
+                       components)
+            )
+        )
+    })
+
     observeEvent(input$dataToConfigure, {
         prefix <-
             ifelse(dataStore$learning.type == "classification",
@@ -223,27 +319,58 @@ shinyServer(function(input, output, session) {
 
         updateTabItems(session, "sideBar", "document")
         generate_detailed_report(dataStore)
+        generate_code_report(dataStore)
 
     })
 
     generate_detailed_report <-
         function(dataStore) {
-            try(rmarkdown::render(
-                file.path("C:/Users/Thiloshon/RProjects/rautoalgo/inst/rmd/generateDetailedReport.Rmd"),
-                c("pdf_document", "md_document"),
-                quiet = T,
-                output_dir = 'Report'
-            ))
+            withProgress(message = "Preparing Reports and Artifacts...", {
+                try(rmarkdown::render(
+                    file.path("C:/Users/Thiloshon/RProjects/rautoalgo/inst/rmd/generateDetailedReport.Rmd"),
+                    c("pdf_document", "md_document"),
+                    quiet = T,
+                    output_dir = 'Report'
+                ))
 
-            print(tempdir())
-            message(paste("Saved generated reports to '", tempdir(), sep = ""))
+                message(paste("Saved generated reports to '", tempdir(), sep = ""))
+            })
         }
+
+    generate_code_report <-
+        function(dataStore) {
+            withProgress(message = "Preparing Reports and Artifacts...", {
+                try(rmarkdown::render(
+                    file.path("C:/Users/Thiloshon/RProjects/rautoalgo/inst/rmd/generateCodeReport.Rmd"),
+                    c("pdf_document", "md_document"),
+                    quiet = T,
+                    output_dir = 'Report'
+                ))
+                message(paste("Saved generated reports to '", tempdir(), sep = ""))
+
+            })
+            }
+
+
+
+    output$downloadInput <- downloadHandler(
+        filename = function() {
+            paste("inputData-", Sys.Date(), ".csv")
+        },
+        content = function(con) {
+            write.csv(dataStore$mlPlan$data, con)
+        }
+    )
 
 
 
     output$evaluations <- renderUI({
+        withProgress(message = "Training and testing models...", {
+            dataStore$mlPlan$train()
 
-        dataStore$mlPlan$train()
+        })
+
+
         data <- dataStore$mlPlan$benchmark()
 
         data$index <- c(1:nrow(data))
@@ -316,8 +443,12 @@ shinyServer(function(input, output, session) {
                     div(class = "secondaryHeaders", h3(
                         "Artifact 02: Machine Learning Models"
                     )),
-                    downloadButton("downloadFlagged", "Download Model"),
+
                     br(),
+
+                    helpText("Models will be downloaded as .RData file. Load with command load('filename.RData') and a list object with the name `models` will be loaded to the calling environment with each models as elements of the list. Use mlr package to continue experiment."),
+                    br(),
+                    downloadButton("downloadModels", "Download Trained Models"),
                     br()
                 ),
 
@@ -339,12 +470,36 @@ shinyServer(function(input, output, session) {
                     div(class = "secondaryHeaders", h3(
                         "Artifact 04: Workflow Source Code"
                     )),
-                    downloadButton("downloadCode", "Download Code"),
-                    br()
+                    br(),
+                    br(),
+                    includeMarkdown("Report/generateCodeReport.md")
                 )
             )
         )
     })
+
+    output$downloadModels <- downloadHandler(
+        filename = function() {
+            paste("models-", Sys.Date(), ".RData", sep = "")
+        },
+        content = function(con) {
+            models <- c()
+            for (i in 1:length(dataStore$mlPlan$ml.pipelines)) {
+                models <- c(models, dataStore$mlPlan$ml.pipelines[[i]]$mlr.model)
+            }
+            save(models, file = con)
+        }
+    )
+
+    output$downloadShortReport <- downloadHandler(
+        filename = function() {
+            paste("automated-training-report-", Sys.Date(), ".pdf", sep = "")
+        },
+        content = function(con) {
+            file.copy('Report/generateDetailedReport.pdf',
+            con)
+        }
+    )
 
 
 

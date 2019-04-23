@@ -74,7 +74,12 @@ shinyUI(dashboardPage(
                                                     # actionButton("queryDatabase", "Query Database", icon("download"))
                                                     actionButton("deploy.classification", label = "Classification Learning"),
                                                     actionButton("deploy.regression", label = "Regression Learning")
-                                                )
+                                                ),
+
+                                                div(class = "progressStep", taskItem(
+                                                    value = 15, color = "orange",
+                                                    "Step 1 of 6"
+                                                ))
                                             ),
                                             tabPanel(
                                                 "Select Data",
@@ -107,7 +112,12 @@ shinyUI(dashboardPage(
                                                     DT::dataTableOutput("inputDataTable")
 
 
-                                                )
+                                                ),
+
+                                                div(class = "progressStep", taskItem(
+                                                    value = 30, color = "orange",
+                                                    "Step 2 of 6"
+                                                ))
                                             ),
 
                                             tabPanel(
@@ -121,17 +131,19 @@ shinyUI(dashboardPage(
 
                                                 tags$br(),
 
-                                                plotOutput("target.plots")
+                                                plotOutput("target.plots"),
+
+                                                div(class = "progressStep", taskItem(
+                                                    value = 40, color = "orange",
+                                                    "Step 3 of 6"
+                                                ))
 
 
-                                            ),
+                                            )
 
                                             # ------------- End of Local Disk Module -------------------
 
-                                            div(class = "progressStep", taskItem(
-                                                value = 15, color = "orange",
-                                                "Step 1 of 6"
-                                            ))
+
                                         )
                                     ))
                          )),
@@ -175,7 +187,12 @@ shinyUI(dashboardPage(
 
                                      ),
                                      div(id = "dataToConfigureDiv",
-                                         actionButton("dataToConfigure", "Next: Train Models"))
+                                         actionButton("dataToConfigure", "Next: Train Models")),
+
+                                     div(class = "progressStep", taskItem(
+                                         value = 60, color = "orange",
+                                         "Step 4 of 6"
+                                     ))
                                  )
 
                                  # ------------- End of Map/Table Module -------------------
@@ -194,12 +211,31 @@ shinyUI(dashboardPage(
 
                                      div(id = "dataToConfigureDiv",
                                          actionButton("train.models", "Next: Download Artifacts"),
-                                         actionButton("train.models", "Breed Selected Models "))
+                                         actionButton("breed.models", "Breed Selected Models ")),
+
+                                     div(class = "progressStep", taskItem(
+                                         value = 80, color = "orange",
+                                         "Step 5 of 6"
+                                     ))
                                  )
 
                                  # ------------- End of Map/Table Module -------------------
                              )
                          )),
+
+                 tabItem("breed",
+                         fluidRow(column(
+                             12,
+                             column(
+                                 12,
+                                 h1("Breeded Models"),
+                                 br(),
+
+                                 uiOutput("breedModels")
+
+
+                             )
+                         ))),
 
                  tabItem("document",
                          fluidRow(column(
@@ -210,6 +246,8 @@ shinyUI(dashboardPage(
                                  br(),
 
                                  uiOutput("documentContentUI")
+
+
                              )
                          )))
                  )
