@@ -1,4 +1,23 @@
-# Decision tree method.
+
+
+
+#' Recommending learners based on dataset.
+#'
+#' Recommends machine learning algorithm best fitting for the given
+#' dataset and learning type.
+#'
+#' @param dataset The dataset to train as a data frame
+#' @param type Type of machine learning, either regression or classsification
+#' @param predictor The target feature as character
+#'
+#' @return data frame of algorithms and thier ranks
+#'
+#' @examples
+#'
+#' ranking <- suggest_learner(iris, "classification", "Species")
+#' ranking <- suggest_learner(cars, "regression", "mpg")
+#'
+#' @export
 suggest_learner <-
     function(dataset, type = "regression", predictor) {
         if (nrow(dataset) == 0) {

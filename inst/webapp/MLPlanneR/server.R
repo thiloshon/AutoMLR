@@ -2,6 +2,13 @@ library(shiny)
 library(ggplot2)
 library(mlr)
 
+source("functions/reference_classes.R")
+source("functions/algorithm_recommender-learner.R")
+source("functions/algorithm_recommender-manual.R")
+source("functions/algorithm_recommender.R")
+
+options(scipen = 999)
+
 shinyServer(function(input, output, session) {
     dataStore <-
         list(
@@ -11,24 +18,7 @@ shinyServer(function(input, output, session) {
         )
 
     showModal(modalDialog(
-        # title = h3("Welcome to AUTOMLR!"),
-        # helpText(
-        #     "AUTOmated Machine Learning in R"
-        # ),
-        # helpText(
-        #     "Click the tabs in the left and follow the instructions to train models."
-        # ),
         img(src = "82.png", align = "center")
-
-        # p(
-        #     "GPL-3 ©Thiloshon Nagarajah, Guhanathan Poravi (2019).
-        #     automlr: Automated Machine Leaning in R. R package version 0.0.018"
-        # ),
-        # p(
-        #     "Contribute: ",
-        #     a("https://github.com/thiloshon/rautoalgo", href = "https://github.com/thiloshon/rautoalgo")
-        # )
-
         ))
 
 
@@ -36,11 +26,24 @@ shinyServer(function(input, output, session) {
         if (input$deploy.classification[[1]] > 0) {
             dataStore$learning.type <<- "classification"
             dataStore$mlPlan <<- MLPlan("classification")
+
         } else if (input$deploy.regression[[1]] > 0) {
             dataStore$learning.type <<- "regression"
             dataStore$mlPlan <<- MLPlan("regression")
         }
 
+        updateTabsetPanel(session, "mlplan", selected = "select.data")
+    })
+
+    observeEvent(input$deploy.regression, {
+        if (input$deploy.classification[[1]] > 0) {
+            dataStore$learning.type <<- "classification"
+            dataStore$mlPlan <<- MLPlan("classification")
+
+        } else if (input$deploy.regression[[1]] > 0) {
+            dataStore$learning.type <<- "regression"
+            dataStore$mlPlan <<- MLPlan("regression")
+        }
 
         updateTabsetPanel(session, "mlplan", selected = "select.data")
     })
@@ -95,14 +98,30 @@ shinyServer(function(input, output, session) {
     })
 
     output$target.plots <- renderPlot({
-        ggplot(dataStore$mlPlan$data) +
-            geom_bar(aes(dataStore$mlPlan$data[, as.numeric(input$selected.target)])) +
-            labs(title = "Count by classes") +
-            xlab("Classes") + theme_linedraw() + theme(
-                plot.background = element_rect(fill = "#323232") ,
-                panel.background = element_rect(fill = "#323232")
+        if (dataStore$learning.type == "classification") {
+           suppressWarnings( ggplot(dataStore$mlPlan$data) +
+                                 geom_bar(aes(dataStore$mlPlan$data[, as.numeric(input$selected.target)])) +
+                                 labs(title = "Count by classes") +
+                                 xlab("Classes") + theme_linedraw() + theme(
+                                     plot.background = element_rect(fill = "#323232") ,
+                                     panel.background = element_rect(fill = "#323232")
+                                 ))
+        } else {
+            suppressWarnings(ggplot(dataStore$mlPlan$data, aes(
+                x = 1:nrow(dataStore$mlPlan$data),
+                y = dataStore$mlPlan$data[, as.numeric(input$selected.target)]
+            )) +
+                geom_point(shape = 1) +
+                geom_smooth(method = lm ,
+                            color = "red",
+                            se = TRUE) +
+                labs(title = "Target Scatter") +
+                xlab("Record") + ylab("Value") + theme_linedraw() + theme(
+                    plot.background = element_rect(fill = "#323232") ,
+                    panel.background = element_rect(fill = "#323232")
+                )
             )
-
+        }
 
     })
 
@@ -128,9 +147,24 @@ shinyServer(function(input, output, session) {
                             dataStore$learning.type,
                             dataStore$mlPlan$target)
 
-        print(algorithms)
+        #message(algorithms)
+
+        split <- split_data(dataStore$mlPlan$data)
+
 
         for (i in 1:10) {
+
+            preproc <-
+                recommend_preprocessing(dataStore$mlPlan$data, algorithms$algorithms_id[1], F)
+            preprocString <- list()
+
+            for (pre in 1:nrow(preproc)) {
+                preprocString[[length(preprocString) + 1]] <- tags$p(paste(preproc$label[1], "on", preproc[pre, 3]))
+
+
+
+            }
+
             components[[i]] <- tagList(
                 HTML(
                     paste(
@@ -146,34 +180,11 @@ shinyServer(function(input, output, session) {
 
                     div(class = "checksListTopic col-sm-3", p("Preprocessing: ")),
                     div(class = "checksListTitle",
-                        p(ifelse(
-                            i == 4 || i == 8,
-                            c(
-                                "Removing features with constant values,
-                                Normalizing numerical features,
-                                Merging small factors into one big factor level,
-                                Cutting off large values like 'infinity',
-                                Creating dummy features for factors,
-                                Factoring features with encoding,
-                                Binning continous variables to levels"
-                            ),
-                            c(
-                                "Removing features with constant values,
-                                Normalizing numerical features,
-                                Merging small factors into one big factor level,
-                                Cutting off large values like 'infinity',
-                                Creating dummy features for factors,
-                                Removing columns,
-                                Factoring features with encoding,
-                                Binning continous variables to levels,
-                                Imputing missing values"
-                            )
-                        ))
-                        ),
-
+                        preprocString
+                       ),
                     div(class = "checksListTopic col-sm-3", p("Train / Test Split: ")),
                     div(class = "checksListTitle",
-                        p("80 / 20")),
+                        p(paste(split * 100, "/", 100 - (split * 100)))),
 
                     div(class = "checksListTopic col-sm-3", p("Evaluation Metric")),
                     div(class = "checksListTitle",
@@ -327,7 +338,7 @@ shinyServer(function(input, output, session) {
         function(dataStore) {
             withProgress(message = "Preparing Reports and Artifacts...", {
                 try(rmarkdown::render(
-                    file.path("C:/Users/Thiloshon/RProjects/rautoalgo/inst/rmd/generateDetailedReport.Rmd"),
+                    file.path("functions/generateDetailedReport.Rmd"),
                     c("pdf_document", "md_document"),
                     quiet = T,
                     output_dir = 'Report'
@@ -341,7 +352,7 @@ shinyServer(function(input, output, session) {
         function(dataStore) {
             withProgress(message = "Preparing Reports and Artifacts...", {
                 try(rmarkdown::render(
-                    file.path("C:/Users/Thiloshon/RProjects/rautoalgo/inst/rmd/generateCodeReport.Rmd"),
+                    file.path("functions/generateCodeReport.Rmd"),
                     c("pdf_document", "md_document"),
                     quiet = T,
                     output_dir = 'Report'

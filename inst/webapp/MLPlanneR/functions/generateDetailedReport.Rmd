@@ -1,0 +1,73 @@
+---
+title: 'Detailed Machine Learning Workflow Report'
+author: "`r Sys.info()[['user']]`"
+date: "`r date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+suppressPackageStartupMessages(library(knitr))
+suppressPackageStartupMessages(library(tools))
+```
+
+## ML Plan
+
+Type: `r dataStore$mlPlan$type`
+
+Target Variable: `r dataStore$mlPlan$target`
+
+### Meta of Data
+
+Number of classes: `r  dataStore$mlPlan$data.meta$number.of.classes`
+
+Size of majority class: `r  dataStore$mlPlan$data.meta$majority.class.size`
+
+Size of minority class: `r  dataStore$mlPlan$data.meta$minority.class.size`
+
+Number of features: `r  dataStore$mlPlan$data.meta$number.of.features`
+
+Number of numeric features: `r  dataStore$mlPlan$data.meta$number.of.numeric.features`
+
+Number of symbolic features: `r  dataStore$mlPlan$data.meta$number.of.symbolic.features`
+
+Number of records: `r  dataStore$mlPlan$data.meta$number.of.instances`
+
+Number of records with missing values: `r  dataStore$mlPlan$data.meta$number.of.instances.with.missing.values`
+
+Number of total missing values: `r  dataStore$mlPlan$data.meta$number.of.missing.values`
+
+
+Data Highlight:
+```{r echo=FALSE}
+
+tibble::tibble(dataStore$mlPlan$data)
+
+```
+
+## ML Pipes
+```{r echo=FALSE, comment=NA}
+
+for (i in 1:length(dataStore$mlPlan$ml.pipelines)) {
+    
+    cat(paste('######################## ', dataStore$mlPlan$ml.pipelines[[i]]$id, ' ########################  \n',  sep = ''))
+    cat('\n')
+    
+    dataStore$mlPlan$ml.pipelines[[i]]$printSelf()
+    
+}
+
+
+
+
+```
+
+
+
+
+## References
+
+Thiloshon Nagarajah and Guhanathan Poravi (2019). automlr: Automated Machine Learning in R. R package version 0.0.009.
+  
+R Core Team (2012). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. ISBN 3-900051-07-0, URL http://www.R-project.org/
+
+

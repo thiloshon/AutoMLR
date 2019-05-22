@@ -40,7 +40,7 @@ MLPlan <-
                     classes.count <-
                         as.data.frame(table(factored.predictor))
                     classes.count <-
-                        classes.count[order(-classes.count$Freq), ]
+                        classes.count[order(-classes.count$Freq),]
 
                     .self$data.meta$number.of.classes <-
                         nrow(classes.count)
@@ -79,7 +79,7 @@ MLPlan <-
 
             split = function() {
                 for (pipe in .self$ml.pipelines) {
-                    pipe$addSplit(makeResampleDesc("Holdout", split = 0.6))
+                    pipe$addSplit(makeResampleDesc("Holdout", split = split_data(.self$data)))
                 }
             },
 
@@ -336,14 +336,3 @@ PipeLine <-
             }
         )
     )
-
-
-
-
-
-plan <-
-    MLPlan(type = "classification")
-plan$addData(sample.data.iris)
-plan$addTarget("Species")
-
-plan$addPipe(pipe)
