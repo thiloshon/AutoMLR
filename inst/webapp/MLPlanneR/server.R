@@ -66,6 +66,8 @@ shinyServer(function(input, output, session) {
         dataStore$inputReceived <<- TRUE
         dataStore$mlPlan$addData(data.table::fread(input$inputFile$datapath))
 
+        print(summarizeColumns(dataStore$mlPlan$data))
+
         updateTabsetPanel(session, "mlplan", selected = "select.target.tab")
     })
 
@@ -99,13 +101,13 @@ shinyServer(function(input, output, session) {
 
     output$target.plots <- renderPlot({
         if (dataStore$learning.type == "classification") {
-           suppressWarnings( ggplot(dataStore$mlPlan$data) +
-                                 geom_bar(aes(dataStore$mlPlan$data[, as.numeric(input$selected.target)])) +
-                                 labs(title = "Count by classes") +
-                                 xlab("Classes") + theme_linedraw() + theme(
-                                     plot.background = element_rect(fill = "#323232") ,
-                                     panel.background = element_rect(fill = "#323232")
-                                 ))
+           suppressWarnings(ggplot(dataStore$mlPlan$data) +
+                                geom_bar(aes(dataStore$mlPlan$data[, as.numeric(input$selected.target)])) +
+                                labs(title = "Count by classes") +
+                                xlab("Classes") + theme_linedraw() + theme(
+                                    plot.background = element_rect(fill = "#323232") ,
+                                    panel.background = element_rect(fill = "#323232")
+                                ))
         } else {
             suppressWarnings(ggplot(dataStore$mlPlan$data, aes(
                 x = 1:nrow(dataStore$mlPlan$data),
@@ -159,10 +161,7 @@ shinyServer(function(input, output, session) {
             preprocString <- list()
 
             for (pre in 1:nrow(preproc)) {
-                preprocString[[length(preprocString) + 1]] <- tags$p(paste(preproc$label[1], "on", preproc[pre, 3]))
-
-
-
+                preprocString[[length(preprocString) + 1]] <- tags$p(paste(preproc[pre, 2], "on", preproc[pre, 3]))
             }
 
             components[[i]] <- tagList(
@@ -312,7 +311,14 @@ shinyServer(function(input, output, session) {
         for (algo in input$algoSelect) {
             temp <- gsub("^\\s+|\\s+$", "", algo)
             pipe <- PipeLine(paste(prefix, temp, sep = "."), temp)
+
+            preproc <-
+                recommend_preprocessing(dataStore$mlPlan$data, algo, F)
+
+            pipe$addPreprocessing(preproc)
+
             dataStore$mlPlan$addPipe(pipe)
+
         }
 
         dataStore$mlPlan$split()
@@ -377,8 +383,8 @@ shinyServer(function(input, output, session) {
 
     output$evaluations <- renderUI({
         withProgress(message = "Training and testing models...", {
+            dataStore$mlPlan$preprocess()
             dataStore$mlPlan$train()
-
         })
 
 
@@ -388,7 +394,7 @@ shinyServer(function(input, output, session) {
 
         data <- data[order(-data$acc.test.mean),]
 
-        print(data)
+        # print(data)
 
         components <- list()
 

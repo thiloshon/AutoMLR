@@ -85,17 +85,10 @@ MLPlan <-
 
             preprocess = function() {
                 for (pipe in .self$ml.pipelines) {
-                    pipe$addPreprocessing("removeConstantFeatures")
-                    pipe$addPreprocessing("normalizeFeatures")
-                    pipe$addPreprocessing("mergeSmallFactorLevels")
 
-                    for (preproc in pipe$preprocessing) {
-                        if (grepl("~", preproc, fixed = T)) {
-                            pair <- strsplit(preproc, "~", fixed = T)
-                        } else {
+                    print(pipe$preprocessing)
 
-                        }
-                    }
+
 
                 }
             },
@@ -219,7 +212,7 @@ PipeLine <-
         fields = list(
             id = "character",
             learner = "character",
-            preprocessing = "character",
+            preprocessing = "data.frame",
             cross.validation = "character",
             data = "data.frame",
             train.split = "list",
@@ -238,13 +231,9 @@ PipeLine <-
                 .self$train.split <- list(resample)
             },
 
-            addPreprocessing = function(preproc, target = NULL) {
-                if (is.null(target)) {
-                    .self$preprocessing <- c(.self$preprocessing, preproc)
-                } else {
-                    .self$preprocessing <-
-                        c(.self$preprocessing, paste(preproc, target, sep = "~"))
-                }
+            addPreprocessing = function(preproc) {
+                print(class(preproc))
+                .self$preprocessing <- preproc
             },
             addValidation = function(validation) {
                 .self$cross.validation <- c(.self$cross.validation, validation)

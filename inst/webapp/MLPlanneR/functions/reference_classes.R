@@ -40,7 +40,7 @@ MLPlan <-
                     classes.count <-
                         as.data.frame(table(factored.predictor))
                     classes.count <-
-                        classes.count[order(-classes.count$Freq),]
+                        classes.count[order(-classes.count$Freq), ]
 
                     .self$data.meta$number.of.classes <-
                         nrow(classes.count)
@@ -74,42 +74,39 @@ MLPlan <-
             },
 
             addPipe = function(pipeline) {
-                .self$ml.pipelines <- c(.self$ml.pipelines, pipeline)
+                pipeline$setData(.self$data)
+                .self$ml.pipelines <-
+                    c(.self$ml.pipelines, pipeline)
             },
 
             split = function() {
                 for (pipe in .self$ml.pipelines) {
-                    pipe$addSplit(makeResampleDesc("Holdout", split = 0.8))
+                    pipe$addSplit(makeResampleDesc("Holdout", split = split_data(pipe$data)))
                 }
             },
 
             preprocess = function() {
                 for (pipe in .self$ml.pipelines) {
-                    pipe$addPreprocessing("removeConstantFeatures")
-                    pipe$addPreprocessing("normalizeFeatures")
-                    pipe$addPreprocessing("mergeSmallFactorLevels")
-
-                    for (preproc in pipe$preprocessing) {
-                        if (grepl("~", preproc, fixed = T)) {
-                            pair <- strsplit(preproc, "~", fixed = T)
-                        } else {
-
-                        }
+                    for (row in 1:nrow(pipe$preprocessing)) {
+                        dataTemp <- do.call(pipe$preprocessing[row, 1], list(data = pipe$data, perform = T))
+                        pipe$setData(dataTemp)
                     }
-
                 }
+
+                print("Data after preprocessing: ")
+                print(.self$ml.pipelines[[1]]$data)
             },
 
             train = function() {
                 configureMlr(on.learner.error = "warn")
 
-                data = subset(.self$data, subset = !is.na(.self$data[.self$target]))
-
                 for (pipe in .self$ml.pipelines) {
+                    dataTemp <- subset(pipe$data, subset = !is.na(pipe$data[.self$target]))
+
                     if (.self$type == "classification") {
                         classif.task = mlr::makeClassifTask(
                             id = pipe$id,
-                            data = data,
+                            data = dataTemp,
                             target = .self$target
                         )
                         pipe$addMLRTask(classif.task)
@@ -130,12 +127,10 @@ MLPlan <-
                         )
                         pipe$addMLRModel(mod)
 
-
-
                     } else if (.self$type == "regression") {
                         regr.task = mlr::makeRegrTask(
                             id = pipe$id,
-                            data = .self$data,
+                            data = dataTemp,
                             target = .self$target
                         )
                         pipe$addMLRTask(regr.task)
@@ -154,21 +149,12 @@ MLPlan <-
                 }
             },
 
-
-            test = function() {
-                # for (pipe in .self$ml.pipelines) {
-                #     print(pipe$mlr.model[[1]]$aggr)
-                # }
-
-            },
-
             benchmark = function() {
                 algorithms <-
-                    read.csv("functions/algorithms scoring.csv")
+                    read.csv("C:/Users/Thiloshon/RProjects/rautoalgo/inst/algorithms scoring.csv")
 
                 benchmark <- data.frame()
 
-                print("LOL")
                 for (pipe in .self$ml.pipelines) {
                     temp <- pipe$mlr.model[[1]]$aggr
                     temp$algo  <- pipe$mlr.model[[1]]$task.id
@@ -185,11 +171,6 @@ MLPlan <-
 
                 }
                 return(benchmark)
-
-            },
-
-
-            deploy = function() {
 
             },
 
@@ -219,7 +200,7 @@ PipeLine <-
         fields = list(
             id = "character",
             learner = "character",
-            preprocessing = "character",
+            preprocessing = "data.frame",
             cross.validation = "character",
             data = "data.frame",
             train.split = "list",
@@ -234,18 +215,18 @@ PipeLine <-
                 .self$learner <- learner
             },
 
+            setData = function(data) {
+                .self$data <- data
+            },
+
             addSplit = function(resample) {
                 .self$train.split <- list(resample)
             },
 
-            addPreprocessing = function(preproc, target = NULL) {
-                if (is.null(target)) {
-                    .self$preprocessing <- c(.self$preprocessing, preproc)
-                } else {
-                    .self$preprocessing <-
-                        c(.self$preprocessing, paste(preproc, target, sep = "~"))
-                }
+            addPreprocessing = function(preproc) {
+                .self$preprocessing <- preproc
             },
+
             addValidation = function(validation) {
                 .self$cross.validation <- c(.self$cross.validation, validation)
             },
@@ -262,42 +243,10 @@ PipeLine <-
                 .self$mlr.model <- list(mlr.model)
             },
 
-
-            updateRows = function(oldRows, newRows) {
-                if (is.numeric(oldRows)) {
-                    #remove by index
-                } else if (is.logical(oldRows)) {
-                    #remove by logical
-                }
-            },
-
-            removeRows = function(rows) {
-
-            },
-
-            updateCols = function(target, newCols) {
-                if (is.numeric(oldRows)) {
-                    #remove by index
-                } else if (is.logical(oldRows)) {
-                    #remove by logical
-                }
-            },
-
-            removeCols = function(target, rows) {
-
-            },
-
             tuneParameters = function() {
 
             },
 
-            train = function() {
-
-            },
-
-            test = function() {
-
-            },
             printSelf = function() {
                 # print(paste("ID:", .self$id))
                 # print(paste("Learner:", .self$learner))

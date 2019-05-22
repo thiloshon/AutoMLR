@@ -1,3 +1,12 @@
+#' Create the package default Questionnaire.
+#'
+#' @return BdQuestionContainer object with default Questions
+#'
+#' @examples
+#'
+#' customQuestionnaire <- create_default_questionnaire()
+#'
+#' @export
 split_data <- function(data) {
     if (nrow(data) < 500) {
         message("Small Data detected")
@@ -14,6 +23,15 @@ split_data <- function(data) {
     }
 }
 
+#' Create the package default Questionnaire.
+#'
+#' @return BdQuestionContainer object with default Questions
+#'
+#' @examples
+#'
+#' customQuestionnaire <- create_default_questionnaire()
+#'
+#' @export
 recommend_preprocessing <- function(data, algorithm, breed) {
     preproc <-
         data.frame(
@@ -24,15 +42,73 @@ recommend_preprocessing <- function(data, algorithm, breed) {
             stringsAsFactors = F
         )
 
-    pre01 <- outlierPre(data, F)
-    if (length(pre01) > 0){
-        preproc[1,] <- c("outlier-detection", "Outlier Removal", paste(pre01, collapse = ", "), TRUE)
-        preproc[2,] <- c("outlier-detection2", "Outlier Removal2", paste(pre01, collapse = ", "), TRUE)
+    pre <- outlierPre(data, F)
+    if (length(pre) > 0) {
+        preproc[nrow(preproc) + 1,] <-
+            c("outlierPre",
+              "Outlier Removal",
+              paste(pre, collapse = ", "),
+              TRUE)
     }
+
+    pre <- factorPre(data, F)
+    if (length(pre) > 0) {
+        preproc[nrow(preproc) + 1,] <-
+            c("factorPre",
+              "Factorization",
+              paste(pre, collapse = ", "),
+              TRUE)
+    }
+
+    pre <- imputePre(data, F)
+    if (length(pre) > 0) {
+        preproc[nrow(preproc) + 1,] <-
+            c("imputePre",
+              "Imputing Missing Values",
+              paste(pre, collapse = ", "),
+              TRUE)
+    }
+
+    pre <- identifierPre(data, F)
+    if (length(pre) > 0) {
+        preproc[nrow(preproc) + 1,] <-
+            c("identifierPre",
+              "Removing Identifiers",
+              paste(pre, collapse = ", "),
+              TRUE)
+    }
+
+    pre <- skewPre(data, F)
+    if (length(pre) > 0) {
+        preproc[nrow(preproc) + 1,] <-
+            c("skewPre",
+              "Fixing Skeweness",
+              paste(pre, collapse = ", "),
+              TRUE)
+    }
+
+    pre <- normalizePre(data, F)
+    if (length(pre) > 0) {
+        preproc[nrow(preproc) + 1,] <-
+            c("normalizePre",
+              "Normalization ",
+              paste(pre, collapse = ", "),
+              TRUE)
+    }
+
 
     return(preproc)
 }
 
+#' Create the package default Questionnaire.
+#'
+#' @return BdQuestionContainer object with default Questions
+#'
+#' @examples
+#'
+#' customQuestionnaire <- create_default_questionnaire()
+#'
+#' @export
 outlierPre <- function(data, perform = T) {
     # beyond 97th %ile based on chi-squared scores
     # (squares of differences between values and mean divided by variance)
@@ -40,58 +116,188 @@ outlierPre <- function(data, perform = T) {
         outliers::scores(data[, sapply(data, is.numeric)] , type = "chisq", prob = 0.97)
 
     if (perform) {
-        return(data[!outliers, ])
+        cols <-
+            colnames(data)[sapply(data, class) %in% c('integer', 'numeric')]
+
+        for (col in cols) {
+            outliers <- boxplot(data[, c(col)], plot = FALSE)$out
+            temp <- data[, col]
+            log <- temp %in% outliers
+            temp[log] <- NA
+            data[, col] <- temp
+        }
+
+
+        return(imputePre(data))
+
     } else {
         return(colnames(outliers)[colSums(outliers == T, na.rm = T) > 0])
     }
 }
 
-factor <- function(data) {
+#' Create the package default Questionnaire.
+#'
+#' @return BdQuestionContainer object with default Questions
+#'
+#' @examples
+#'
+#' customQuestionnaire <- create_default_questionnaire()
+#'
+#' @export
+factorPre <- function(data, perform = T) {
+    retVar <- vector()
+
     for (var in colnames(data)) {
         # factorization score algorithm
         # if values are binary or
         # distinct values / records is lower than threshold
         # it has high probability of being a factor variable
-        distinct_vals <- unique(data[, var])
+        distinct_vals <- length(unique(data[, var]))
         score <- distinct_vals / nrow(data)
 
-        if (distinct_vals == 2 | score < 0.05) {
-            data[, var] <- as.factor(data[, var])
+        if (perform) {
+            if (distinct_vals == 2 | score < 0.05) {
+                data[, var] <- as.factor(data[, var])
+            }
+        } else {
+            if (distinct_vals == 2 | score < 0.05) {
+                retVar <- c(retVar, var)
+            }
         }
     }
 
-    return(data)
+    if (perform) {
+        return(data)
+    } else {
+        return(retVar)
+    }
 }
 
-impute <- function(data) {
+#' Create the package default Questionnaire.
+#'
+#' @return BdQuestionContainer object with default Questions
+#'
+#' @examples
+#'
+#' customQuestionnaire <- create_default_questionnaire()
+#'
+#' @export
+imputePre <- function(data, perform = T) {
+    # columns <-
+    #     sapply(data, class) %in% c('integer', 'factor', 'numeric')
+
     na_ratio <- as.data.frame(colMeans(is.na(data)))
-    na_ratio <- na_ratio[(na_ratio[, 2] != 0), ]
+    na_ratio$cols <- colnames(na_ratio)
 
-    cols <- na.ratio[(na_ratio[, 2] < 0.45), 1]
+    if (!any(na_ratio[, 1] != 0)) {
+        # No missing values in dataset
+        return()
+    }
 
-    imp <-
-        impute(
-            data,
-            target = cols,
-            classes = list(factor = imputeMode(), integer = imputeMean()),
-            dummy.classes = c("integer", "factor"),
-            dummy.type = "numeric"
-        )
+    na_ratio <- na_ratio[(na_ratio[, 1] != 0), ]
 
-    return(imp$data)
+    cols <- rownames(na_ratio)[(na_ratio[, 1] < 0.45)]
+
+    if (perform) {
+        imp <-
+            impute(
+                data,
+                classes = list(
+                    factor = imputeMode(),
+                    integer = imputeMean(),
+                    numeric = imputeMedian()
+                ),
+                dummy.classes = c("integer", "factor"),
+                dummy.type = "numeric"
+            )
+        return(imp$data)
+    } else {
+        return(cols)
+    }
 }
 
-normalize <- function(data){
-    cols <- vector()
-    for (var in colnames(data)) {
-        skew <- e1071::skewness(data[,var])
-        if (abs(skew) > 0.4){
-            cols <- c(cols, var)
+#' Create the package default Questionnaire.
+#'
+#' @return BdQuestionContainer object with default Questions
+#'
+#' @examples
+#'
+#' customQuestionnaire <- create_default_questionnaire()
+#'
+#' @export
+identifierPre <- function(data, perform = T) {
+    names <- tolower(colnames(data))
+    cols <- names[endsWith(names, "id")]
+
+    if (perform) {
+        return(data[,!(names(data) %in% cols)])
+    } else {
+        return(cols)
+    }
+}
+
+#' Create the package default Questionnaire.
+#'
+#' @return BdQuestionContainer object with default Questions
+#'
+#' @examples
+#'
+#' customQuestionnaire <- create_default_questionnaire()
+#'
+#' @export
+skewPre <- function(data, perform = T) {
+    cols <-
+        colnames(data)[sapply(data, class) %in% c('integer', 'numeric')]
+    returnCol <- vector()
+
+    for (var in cols) {
+        print(var)
+        skew <- e1071::skewness(data[, var], na.rm = T)
+        print(skew)
+        if (!is.na(skew) & abs(skew) > 0.5) {
+            returnCol <- c(returnCol, var)
         }
     }
 
-    trainTask <- normalizeFeatures(data, target = cols ,method = "standardize")
+    if (perform) {
+        for (var in cols) {
+            skew <- e1071::skewness(data[, var], na.rm = T)
+            if (!is.na(skew) & abs(skew) > 0.4) {
+                data[,var] <- log1p(data[,var])
+            }
+        }
+        return(data)
+
+    } else {
+        return(returnCol)
+    }
+
 }
 
+#' Create the package default Questionnaire.
+#'
+#' @return BdQuestionContainer object with default Questions
+#'
+#' @examples
+#'
+#' customQuestionnaire <- create_default_questionnaire()
+#'
+#' @export
+normalizePre <- function(data, perform = T) {
+    cols <-
+        colnames(data)[sapply(data, class) %in% c('integer', 'numeric')]
 
+    if (perform) {
+        dat <-
+            normalizeFeatures(data , method = "standardize")
+        return(dat)
+    } else {
+        return(cols)
+    }
+}
 
+insignificancePre <- function(data, perform = T) {
+    data <- data[, sapply(data, class) %in% c('integer', 'numeric')]
+    print(abs(cor(data)))
+    generateFilterValuesData(trainTask, method = c("information.gain", "chi.squared"))
+}
