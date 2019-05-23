@@ -17,9 +17,7 @@ shinyServer(function(input, output, session) {
             inputReceived = FALSE
         )
 
-    showModal(modalDialog(
-        img(src = "82.png", align = "center")
-        ))
+    showModal(modalDialog(img(src = "82.png", align = "center")))
 
 
     observeEvent(input$deploy.classification, {
@@ -65,6 +63,8 @@ shinyServer(function(input, output, session) {
     observeEvent(input$select.data.button, {
         dataStore$inputReceived <<- TRUE
         dataStore$mlPlan$addData(data.table::fread(input$inputFile$datapath))
+        print(recommend_evaluation(dataStore$mlPlan$data, dataStore$learning.type))
+        dataStore$mlPlan$addEvaluation(recommend_evaluation(dataStore$mlPlan$data, dataStore$learning.type))
 
         print(summarizeColumns(dataStore$mlPlan$data))
 
@@ -101,27 +101,35 @@ shinyServer(function(input, output, session) {
 
     output$target.plots <- renderPlot({
         if (dataStore$learning.type == "classification") {
-           suppressWarnings(ggplot(dataStore$mlPlan$data) +
-                                geom_bar(aes(dataStore$mlPlan$data[, as.numeric(input$selected.target)])) +
-                                labs(title = "Count by classes") +
-                                xlab("Classes") + theme_linedraw() + theme(
-                                    plot.background = element_rect(fill = "#323232") ,
-                                    panel.background = element_rect(fill = "#323232")
-                                ))
+            suppressWarnings(
+                ggplot(dataStore$mlPlan$data) +
+                    geom_bar(aes(dataStore$mlPlan$data[, as.numeric(input$selected.target)])) +
+                    labs(title = "Count by classes") +
+                    xlab("Classes") + theme_linedraw() + theme(
+                        plot.background = element_rect(fill = "#323232") ,
+                        panel.background = element_rect(fill = "#323232")
+                    )
+            )
         } else {
-            suppressWarnings(ggplot(dataStore$mlPlan$data, aes(
-                x = 1:nrow(dataStore$mlPlan$data),
-                y = dataStore$mlPlan$data[, as.numeric(input$selected.target)]
-            )) +
-                geom_point(shape = 1) +
-                geom_smooth(method = lm ,
-                            color = "red",
-                            se = TRUE) +
-                labs(title = "Target Scatter") +
-                xlab("Record") + ylab("Value") + theme_linedraw() + theme(
-                    plot.background = element_rect(fill = "#323232") ,
-                    panel.background = element_rect(fill = "#323232")
-                )
+            suppressWarnings(
+                ggplot(
+                    dataStore$mlPlan$data,
+                    aes(
+                        x = 1:nrow(dataStore$mlPlan$data),
+                        y = dataStore$mlPlan$data[, as.numeric(input$selected.target)]
+                    )
+                ) +
+                    geom_point(shape = 1) +
+                    geom_smooth(
+                        method = lm ,
+                        color = "red",
+                        se = TRUE
+                    ) +
+                    labs(title = "Target Scatter") +
+                    xlab("Record") + ylab("Value") + theme_linedraw() + theme(
+                        plot.background = element_rect(fill = "#323232") ,
+                        panel.background = element_rect(fill = "#323232")
+                    )
             )
         }
 
@@ -155,13 +163,15 @@ shinyServer(function(input, output, session) {
 
 
         for (i in 1:10) {
-
             preproc <-
-                recommend_preprocessing(dataStore$mlPlan$data, algorithms$algorithms_id[1], F)
+                recommend_preprocessing(dataStore$mlPlan$data,
+                                        algorithms$algorithms_id[1],
+                                        F)
             preprocString <- list()
 
             for (pre in 1:nrow(preproc)) {
-                preprocString[[length(preprocString) + 1]] <- tags$p(paste(preproc[pre, 2], "on", preproc[pre, 3]))
+                preprocString[[length(preprocString) + 1]] <-
+                    tags$p(paste(preproc[pre, 2], "on", preproc[pre, 3]))
             }
 
             components[[i]] <- tagList(
@@ -179,15 +189,18 @@ shinyServer(function(input, output, session) {
 
                     div(class = "checksListTopic col-sm-3", p("Preprocessing: ")),
                     div(class = "checksListTitle",
-                        preprocString
-                       ),
+                        preprocString),
                     div(class = "checksListTopic col-sm-3", p("Train / Test Split: ")),
                     div(class = "checksListTitle",
-                        p(paste(split * 100, "/", 100 - (split * 100)))),
+                        p(paste(
+                            split * 100, "/", 100 - (split * 100)
+                        ))),
 
                     div(class = "checksListTopic col-sm-3", p("Evaluation Metric")),
                     div(class = "checksListTitle",
-                        p("Accuracy"))
+                        p(
+                            dataStore$mlPlan$evaluation
+                        ))
                 ),
                 br(),
                 br()
@@ -234,9 +247,7 @@ shinyServer(function(input, output, session) {
                     div(class = "checksListTitle",
                         p(ifelse(
                             i == 1,
-                            c(
-                                "None"
-                            ),
+                            c("None"),
                             ifelse(
                                 i == 2,
                                 c(
@@ -256,9 +267,7 @@ shinyServer(function(input, output, session) {
                                     ),
                                     ifelse(
                                         i == 4,
-                                        c(
-                                            "Normalizing numerical features"
-                                        ),
+                                        c("Normalizing numerical features"),
                                         c(
                                             "Removing features with constant values,
                                 Normalizing numerical features,
@@ -274,8 +283,7 @@ shinyServer(function(input, output, session) {
                                 )
                             )
 
-                        ))
-                        ),
+                        ))),
 
                     div(class = "checksListTopic col-sm-3", p("Train / Test Split: ")),
                     div(class = "checksListTitle",
@@ -332,8 +340,6 @@ shinyServer(function(input, output, session) {
     })
 
     observeEvent(input$train.models, {
-
-
         updateTabItems(session, "sideBar", "document")
         generate_detailed_report(dataStore)
         generate_code_report(dataStore)
@@ -366,7 +372,7 @@ shinyServer(function(input, output, session) {
                 message(paste("Saved generated reports to '", tempdir(), sep = ""))
 
             })
-            }
+        }
 
 
 
@@ -387,18 +393,31 @@ shinyServer(function(input, output, session) {
             dataStore$mlPlan$train()
         })
 
-
         data <- dataStore$mlPlan$benchmark()
-
         data$index <- c(1:nrow(data))
 
-        data <- data[order(-data$acc.test.mean),]
+        isClassification <-
+            dataStore$mlPlan$evaluation == "Accuracy"
 
-        # print(data)
+        if (isClassification) {
+            data <- data[order(-data$acc.test.mean), ]
+        } else {
+            data <- data[order(data$mae.test.mean), ]
+        }
 
         components <- list()
 
         for (i in 1:nrow(data)) {
+            value <-
+                ifelse(
+                    isClassification,
+                    as.numeric(data$acc.test.mean[i]) * 100,
+                    as.numeric(data$mae.test.mean[i])
+                )
+            label <-
+                ifelse(isClassification,
+                       "Out of Sample Accuracy: ",
+                       "Mean Absolute Error: ")
             components[[i]] <- tagList(
                 HTML(
                     paste(
@@ -412,30 +431,29 @@ shinyServer(function(input, output, session) {
                     class = "checksListContent",
                     h4(data$name[i]),
 
-                    div(class = "checksListTopic col-sm-3", p("Out of Sample Accuracy: ")),
+                    div(class = "checksListTopic col-sm-3", p(label)),
                     div(class = "checksListTitle",
-                        p(as.numeric(data$acc.test.mean[i]) * 100)
-                    ),
+                        p(value)),
 
                     div(class = "checksListTopic col-sm-3", p("Training Duration")),
                     div(class = "checksListTitle",
-                        p(paste(data$timetrain.test.mean[i], "Seconds")))
+                        p(
+                            paste(data$timetrain.test.mean[i], "Seconds")
+                        ))
                 ),
                 br(),
                 br()
 
-                            )
+            )
         }
 
-        return(
-            div(
-                id = "trainSelect",
-                tags$br(),
-                tags$br(),
-                column(width = 12,
-                       components)
-            )
-        )
+        return(div(
+            id = "trainSelect",
+            tags$br(),
+            tags$br(),
+            column(width = 12,
+                   components)
+        ))
 
 
     })
@@ -444,55 +462,56 @@ shinyServer(function(input, output, session) {
 
     output$documentContentUI <- renderUI({
         input$flagButton
-        tagList(
-            tabsetPanel(
-                type = "tabs",
-                tabPanel(
-                    "Data",
-                    div(class = "secondaryHeaders", h3("Artifact 01: Input Data")),
-                    downloadButton("downloadInput", "Download Input Data"),
-                    br(),
-                    br(),
-                    DT::renderDataTable(dataStore$mlPlan$data, width = 300)
+        tagList(tabsetPanel(
+            type = "tabs",
+            tabPanel(
+                "Data",
+                div(class = "secondaryHeaders", h3("Artifact 01: Input Data")),
+                downloadButton("downloadInput", "Download Input Data"),
+                br(),
+                br(),
+                DT::renderDataTable(dataStore$mlPlan$data, width = 300)
+            ),
+            tabPanel(
+                "Models",
+                div(class = "secondaryHeaders", h3(
+                    "Artifact 02: Machine Learning Models"
+                )),
+
+                br(),
+
+                helpText(
+                    "Models will be downloaded as .RData file. Load with command load('filename.RData') and a list object with the name `models` will be loaded to the calling environment with each models as elements of the list. Use mlr package to continue experiment."
                 ),
-                tabPanel(
-                    "Models",
-                    div(class = "secondaryHeaders", h3(
-                        "Artifact 02: Machine Learning Models"
-                    )),
+                br(),
+                downloadButton("downloadModels", "Download Trained Models"),
+                br()
+            ),
 
-                    br(),
-
-                    helpText("Models will be downloaded as .RData file. Load with command load('filename.RData') and a list object with the name `models` will be loaded to the calling environment with each models as elements of the list. Use mlr package to continue experiment."),
-                    br(),
-                    downloadButton("downloadModels", "Download Trained Models"),
-                    br()
-                ),
-
-                tabPanel(
-                    "Report",
-                    div(class = "secondaryHeaders", h3(
-                        "Artifact 03: Extensive Machine Learning Report"
-                    )),
-
-                    downloadButton("downloadShortReport", "Download Report in PDF"),
-                    br(),
-                    br(),
-                    includeMarkdown("Report/generateDetailedReport.md")
+            tabPanel(
+                "Report",
+                div(
+                    class = "secondaryHeaders",
+                    h3("Artifact 03: Extensive Machine Learning Report")
                 ),
 
+                downloadButton("downloadShortReport", "Download Report in PDF"),
+                br(),
+                br(),
+                includeMarkdown("Report/generateDetailedReport.md")
+            ),
 
-                tabPanel(
-                    "Source Code",
-                    div(class = "secondaryHeaders", h3(
-                        "Artifact 04: Workflow Source Code"
-                    )),
-                    br(),
-                    br(),
-                    includeMarkdown("Report/generateCodeReport.md")
-                )
+
+            tabPanel(
+                "Source Code",
+                div(class = "secondaryHeaders", h3(
+                    "Artifact 04: Workflow Source Code"
+                )),
+                br(),
+                br(),
+                includeMarkdown("Report/generateCodeReport.md")
             )
-        )
+        ))
     })
 
     output$downloadModels <- downloadHandler(
@@ -502,7 +521,8 @@ shinyServer(function(input, output, session) {
         content = function(con) {
             models <- c()
             for (i in 1:length(dataStore$mlPlan$ml.pipelines)) {
-                models <- c(models, dataStore$mlPlan$ml.pipelines[[i]]$mlr.model)
+                models <- c(models,
+                            dataStore$mlPlan$ml.pipelines[[i]]$mlr.model)
             }
             save(models, file = con)
         }
@@ -510,11 +530,14 @@ shinyServer(function(input, output, session) {
 
     output$downloadShortReport <- downloadHandler(
         filename = function() {
-            paste("automated-training-report-", Sys.Date(), ".pdf", sep = "")
+            paste("automated-training-report-",
+                  Sys.Date(),
+                  ".pdf",
+                  sep = "")
         },
         content = function(con) {
             file.copy('Report/generateDetailedReport.pdf',
-            con)
+                      con)
         }
     )
 

@@ -9,7 +9,8 @@ MLPlan <-
             type = "character",
             target = "character",
             data.meta = "list",
-            ml.pipelines = "list"
+            ml.pipelines = "list",
+            evaluation = "character"
         ),
         methods = list(
             initialize = function(type = "classification") {
@@ -79,6 +80,10 @@ MLPlan <-
                     c(.self$ml.pipelines, pipeline)
             },
 
+            addEvaluation = function(eval){
+                .self$evaluation <- eval
+            },
+
             split = function() {
                 for (pipe in .self$ml.pipelines) {
                     pipe$addSplit(makeResampleDesc("Holdout", split = split_data(pipe$data)))
@@ -142,7 +147,7 @@ MLPlan <-
                         mod = mlr::resample(regr.lrn,
                                             regr.task,
                                             pipe$train.split[[1]],
-                                            measures = list(mmce, acc, timetrain))
+                                            measures = list(mae, mse, timetrain))
                         pipe$addMLRModel(mod)
 
                     }

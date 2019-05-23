@@ -23,6 +23,14 @@ split_data <- function(data) {
     }
 }
 
+recommend_evaluation <- function(data, type){
+    if (type == "classification"){
+        return("Accuracy")
+    } else {
+        return("Mean Absolute Error")
+    }
+}
+
 #' Create the package default Questionnaire.
 #'
 #' @return BdQuestionContainer object with default Questions
@@ -251,9 +259,7 @@ skewPre <- function(data, perform = T) {
     returnCol <- vector()
 
     for (var in cols) {
-        print(var)
         skew <- e1071::skewness(data[, var], na.rm = T)
-        print(skew)
         if (!is.na(skew) & abs(skew) > 0.5) {
             returnCol <- c(returnCol, var)
         }
