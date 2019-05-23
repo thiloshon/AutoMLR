@@ -5,170 +5,153 @@
 
 
 # Decision tree method.
-suggest_learner_manual <- function(dataset, type = "regression") {
-    if (nrow(dataset)==0) {
-        stop("Empty Dataset")
-    }
+suggest_learner_manual <-
+    function(dataset, type = "regression", target) {
+        if (nrow(dataset) == 0) {
+            stop("Empty Dataset")
+        }
 
-    # Manual Rules from spread sheet
-    # Thanks to scikit-learn
+        # Manual Rules from spread sheet
+        # Thanks to scikit-learn
 
 
-    # TODO: Get input type and decide (text / audio)
+        # TODO: Get input type and decide (text / audio)
 
-    number_of_records <- nrow(dataset)
+        number_of_records <- nrow(dataset)
 
-    if (number_of_records < 50) {
-        print("Not enough data")
-        return(list("Collect more records"))
-    }
+        if (number_of_records < 50) {
+            print("Not enough data")
+            return(list("Collect more records"))
+        }
 
-    requiredScores <- vector()
+        requiredScores <- vector()
 
-    if (category_pred(type)) {
-        print("Catgorical Data")
+        if (category_pred(type)) {
+            print("Catgorical Data")
 
-        requiredScores <- c(requiredScores, "categorical_data")
+            requiredScores <- c(requiredScores, "categorical_data")
 
-        print(requiredScores)
+            if (label_data(type)) {
+                # ------ Classification Algorithms ------
+                print("Labelled Data")
+                requiredScores <- c(requiredScores, "labelled_data")
 
-        if (label_data(type)) {
-            # ------ Classification Algorithms ------
-            print("Labelled Data")
-            requiredScores <- c(requiredScores, "labelled_data")
+                if (number_of_records > 100000) {
+                    print("Large dataset")
+                    requiredScores <-
+                        c(requiredScores, "large_data")
+
+                    if (text_data()) {
+                        print("Text Data")
+                        requiredScores <-
+                            c(requiredScores, "text_data")
+                    } else {
+                        print("Non textual data")
+                    }
+                } else {
+                    print("Medium data")
+                    requiredScores <-
+                        c(requiredScores, "medium_data")
+                }
+
+                # ------ END OF Classification Algorithms ------
+            } else {
+                # ------ Clustering Algorithms ------
+                print(" Non labelled data")
+                requiredScores <-
+                    c(requiredScores, "unlabelled_data")
+
+                if (category_known(type)) {
+                    print("Known categories")
+                    requiredScores <-
+                        c(requiredScores, "known_clusters")
+
+                    if (number_of_records > 100000) {
+                        print("Large dataset")
+                        requiredScores <-
+                            c(requiredScores, "large_data")
+                    } else {
+                        print("Medium data")
+                        requiredScores <-
+                            c(requiredScores, "medium_data")
+                    }
+
+                }
+                else {
+                    print("Unknown categories")
+                    requiredScores <-
+                        c(requiredScores, "unknown_clusters")
+
+                    if (number_of_records > 100000) {
+                        print("Large dataset")
+                        requiredScores <-
+                            c(requiredScores, "large_data")
+                    } else {
+                        print("Medium data")
+                        requiredScores <-
+                            c(requiredScores, "medium_data")
+                    }
+
+                    # ------ END OF Clustering Algorithms ------
+                }
+            }
+        }
+
+        else {
+            print("Continous data")
+            requiredScores <- c(requiredScores, "continous_data")
+
+            # ------ Regression Algorithms
 
             if (number_of_records > 100000) {
                 print("Large dataset")
                 requiredScores <- c(requiredScores, "large_data")
-
-                if (text_data()) {
-                    print("Text Data")
-                    requiredScores <- c(requiredScores, "text_data")
-
-                    # return(
-                    #     list(
-                    #         "Linear Support Vector Classification - classif.LiblineaRL1L2SVC",
-                    #         "Naive Bayes - classif.naiveBayes"
-                    #     )
-                    # )
-                } else {
-                    print("Non textual data")
-                    # return(
-                    #     list(
-                    #         "Linear SVC - classif.LiblineaRL1L2SVC",
-                    #         "k-Nearest Neighbor - classif.kknn",
-                    #         "Support Vector Classification - classif.svm"
-                    #     )
-                    # )
-                }
             } else {
-                print("Medium data")
+                print("Medium dataset")
                 requiredScores <- c(requiredScores, "medium_data")
-                # return(
-                #     list(
-                #         "Support Vector Machines with Kernel - classif.ksvm",
-                #         "Stochastic Gradient Descent - sgd v1.1"
-                #     )
-                # )
             }
-
-            # ------ END OF Classification Algorithms ------
-        } else {
-            # ------ Clustering Algorithms ------
-            print(" Non labelled data")
-            requiredScores <- c(requiredScores, "unlabelled_data")
-
-            if (category_known(type)) {
-                print("Known categories")
-                requiredScores <- c(requiredScores, "known_clusters")
-
-                if (number_of_records > 100000) {
-                    print("Large dataset")
-                    requiredScores <- c(requiredScores, "large_data")
-
-                    # return(
-                    #     list(
-                    #         "K-Means - cluster.SimpleKMeans",
-                    #         "Spectral Clustering - kernlab v0.9-27",
-                    #         "Gaussian Mixture Model - mclust v5.4.2; ClusterR v1.1.8"
-                    #     )
-                    # )
-                } else {
-                    print("Medium data")
-                    requiredScores <- c(requiredScores, "medium_data")
-                    # return(list("MiniBatch KMeans - ClusterR v1.1.8"))
-                }
-
-            }
-            else {
-                print("Unknown categories")
-                requiredScores <- c(requiredScores, "unknown_clusters")
-
-                if (number_of_records > 100000) {
-                    print("Large dataset")
-                    requiredScores <- c(requiredScores, "large_data")
-
-                    # return(
-                    #     list(
-                    #         "Mean shift - meanShiftR v0.53",
-                    #         "Variational Bayesian Gaussian Mixture Model - TargetScore v1.10.0"
-                    #     )
-                    # )
-                } else {
-                    print("Medium data")
-                    requiredScores <- c(requiredScores, "medium_data")
-                    # return(list("Tough luck"))
-
-                }
-
-                # ------ END OF Clustering Algorithms ------
-            }
-
-
+            # ------ END OF Regression Algorithms
         }
-    }
 
-    else {
-        print("Continous data")
-        requiredScores <- c(requiredScores, "continous_data")
+        algorithms_manual <-
+            read.csv("functions/algorithms scoring.csv")
+        algorithms_manual[is.na(algorithms_manual)] <- 0
 
-        # ------ Regression Algorithms
+        scoreboard <-
+            algorithms_manual[, c(
+                "algorithms_id",
+                "algorithms_name",
+                "meta_name",
+                "meta_influenze",
+                "type",
+                requiredScores
+            )]
 
-        if (number_of_records > 100000) {
-            print("Large dataset")
-            requiredScores <- c(requiredScores, "large_data")
+        print("sdf:")
+        print(scoreboard)
+        print(type)
 
-            # if(important_features()){
-            #     print("few features should be important")
-            #     return(list("GLM with Lasso or Elasticnet Regularization - regr.glmnet"))
-            # }
+        # Cleanign scoreboard
+        scoreboard <-
+            scoreboard[scoreboard$type == type |
+                           scoreboard$type == "both", ]
+        print(scoreboard)
+        print("yu")
+        scoreboard2 <- getProperties(dataset, type, target)
+        print(scoreboard2)
+        mix <- scoreboard$algorithms_id
 
-            # return(
-            #     list(
-            #         "GLM with Lasso or Elasticnet Regularization - regr.glmnet",
-            #         "Ridge Regression - glmnet v2.0-16 ; ridge v2.3",
-            #         "Linear Kernel Support Vector Machines"
-            #     )
-            # )
+        if(type == "classification"){
+            clean <- sub("classif.", "", scoreboard2$class)
         } else {
-            print("Medium dataset")
-            requiredScores <- c(requiredScores, "medium_data")
-            # return(list("Stochastic Gradient Descent - sgd v1.1"))
+            clean <- sub("regr.", "", scoreboard2$class)
         }
 
 
 
-        # ------ END OF Regression Algorithms
+        return(scoreboard[mix %in% clean,])
+
     }
-
-    algorithms_manual <- read.csv("functions/algorithms scoring.csv")
-    algorithms_manual[is.na(algorithms_manual)] <- 0
-
-    scoreboard <- algorithms_manual[, c("algorithms_id", "algorithms_name", "meta_name", "meta_influenze", "type", requiredScores)]
-
-    return(scoreboard)
-
-}
 
 
 category_pred <- function(type) {
@@ -193,4 +176,38 @@ category_known <- function(type) {
     } else {
         return(FALSE)
     }
+}
+
+getProperties <- function(data, type, target) {
+    props <- vector()
+    tempData <- data[, !(names(data) %in% target)]
+    tempData <- factorPre(tempData)
+
+    if (any(sapply(tempData, class) %in% c('numeric'))) {
+        props <- c(props, "numerics")
+    }
+
+    if (any(sapply(tempData, class) %in% c('factor'))) {
+        props <- c(props, "factors")
+    }
+
+    if (any(colMeans(is.na(tempData)) != 0)) {
+        props <- c(props, "missings")
+    }
+
+    if (type == "classification") {
+        temp <- as.factor(data[, target])
+        if (length(levels(temp)) == 2) {
+            props <- c(props, "twoclass")
+        } else {
+            props <- c(props, "multiclass")
+        }
+    }
+
+    suppressWarnings(listLearners(
+        ifelse(type == "classification", "classif", "regr"),
+        properties = props,
+        quiet = T,
+        warn.missing.packages = T
+    ))
 }

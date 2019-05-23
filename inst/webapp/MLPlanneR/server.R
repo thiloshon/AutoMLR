@@ -6,6 +6,7 @@ source("functions/reference_classes.R")
 source("functions/algorithm_recommender-learner.R")
 source("functions/algorithm_recommender-manual.R")
 source("functions/algorithm_recommender.R")
+source("functions/preprocessing.R")
 
 options(scipen = 999)
 
@@ -63,8 +64,6 @@ shinyServer(function(input, output, session) {
     observeEvent(input$select.data.button, {
         dataStore$inputReceived <<- TRUE
         dataStore$mlPlan$addData(data.table::fread(input$inputFile$datapath))
-        print(recommend_evaluation(dataStore$mlPlan$data, dataStore$learning.type))
-        dataStore$mlPlan$addEvaluation(recommend_evaluation(dataStore$mlPlan$data, dataStore$learning.type))
 
         print(summarizeColumns(dataStore$mlPlan$data))
 
@@ -73,6 +72,15 @@ shinyServer(function(input, output, session) {
 
     observeEvent(input$select.target.button, {
         dataStore$mlPlan$addTarget(as.numeric(input$selected.target))
+        dataStore$mlPlan$addEvaluation(
+            recommend_evaluation(
+                dataStore$mlPlan$data,
+                dataStore$learning.type,
+                dataStore$mlPlan$target
+            )
+        )
+
+
         updateTabItems(session, "sideBar", "pipes")
         updateTabsetPanel(session, "mlpipes", selected = "data.split")
     })
@@ -396,11 +404,14 @@ shinyServer(function(input, output, session) {
         data <- dataStore$mlPlan$benchmark()
         data$index <- c(1:nrow(data))
 
-        isClassification <-
+        isAccuracy <-
             dataStore$mlPlan$evaluation == "Accuracy"
+        isBalanceError <- dataStore$mlPlan$evaluation == "Balanced Error Rate"
 
-        if (isClassification) {
+        if (isAccuracy) {
             data <- data[order(-data$acc.test.mean), ]
+        } else if (isBalanceError) {
+            data <- data[order(data$ber.test.mean), ]
         } else {
             data <- data[order(data$mae.test.mean), ]
         }
@@ -410,14 +421,20 @@ shinyServer(function(input, output, session) {
         for (i in 1:nrow(data)) {
             value <-
                 ifelse(
-                    isClassification,
+                    isAccuracy,
                     as.numeric(data$acc.test.mean[i]) * 100,
-                    as.numeric(data$mae.test.mean[i])
+                    ifelse(
+                        isBalanceError,
+                        as.numeric(data$ber.test.mean[i]),
+                        as.numeric(data$mae.test.mean[i])
+                    )
                 )
             label <-
-                ifelse(isClassification,
-                       "Out of Sample Accuracy: ",
-                       "Mean Absolute Error: ")
+                ifelse(
+                    isAccuracy,
+                    "Out of Sample Accuracy: ",
+                    ifelse(isBalanceError, "Balanced Error Rate", "Mean Absolute Error: ")
+                )
             components[[i]] <- tagList(
                 HTML(
                     paste(
@@ -438,7 +455,7 @@ shinyServer(function(input, output, session) {
                     div(class = "checksListTopic col-sm-3", p("Training Duration")),
                     div(class = "checksListTitle",
                         p(
-                            paste(data$timetrain.test.mean[i], "Seconds")
+                            paste(data$totalTime[i], "Seconds")
                         ))
                 ),
                 br(),

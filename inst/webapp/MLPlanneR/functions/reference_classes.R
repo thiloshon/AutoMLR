@@ -99,11 +99,12 @@ MLPlan <-
                 }
 
                 print("Data after preprocessing: ")
-                print(.self$ml.pipelines[[1]]$data)
+                print(head(.self$ml.pipelines[[1]]$data))
             },
 
             train = function() {
                 configureMlr(on.learner.error = "warn")
+
 
                 for (pipe in .self$ml.pipelines) {
                     dataTemp <- subset(pipe$data, subset = !is.na(pipe$data[.self$target]))
@@ -128,7 +129,7 @@ MLPlan <-
                             classif.lrn,
                             classif.task,
                             pipe$train.split[[1]],
-                            measures = list(mmce, acc, timetrain)
+                            measures = list(ber, acc, timetrain)
                         )
                         pipe$addMLRModel(mod)
 
@@ -163,6 +164,7 @@ MLPlan <-
                 for (pipe in .self$ml.pipelines) {
                     temp <- pipe$mlr.model[[1]]$aggr
                     temp$algo  <- pipe$mlr.model[[1]]$task.id
+                    temp$totalTime <- pipe$mlr.model[[1]]$runtime
 
                     temp$name <-
                         algorithms[which(algorithms$algorithms_id == pipe$mlr.model[[1]]$task.id), 2]

@@ -8,10 +8,10 @@ suggest_learner_meta <-
 
         dataset <- as.data.frame(dataset)
 
-        factored.predictor <- as.factor(dataset[,predictor])
+        factored.predictor <- as.factor(dataset[, predictor])
 
         classes.count <- as.data.frame(table(factored.predictor))
-        classes.count <- classes.count[order(-classes.count$Freq),]
+        classes.count <- classes.count[order(-classes.count$Freq), ]
 
         majority.class.size <- classes.count[1, 2]
         minority.class.size <- classes.count[nrow(classes.count), 2]
@@ -25,14 +25,14 @@ suggest_learner_meta <-
         number.of.missing.values <-
             sum(as.vector(is.na(dataset)), na.rm = TRUE)
         number.of.numeric.features <-
-            sum(as.vector(unlist(
-                lapply(dataset, is.numeric)
-            )), na.rm = TRUE)
+            sum(as.vector(unlist(lapply(
+                dataset, is.numeric
+            ))), na.rm = TRUE)
 
         number.of.symbolic.features <-
-            sum(as.vector(unlist(
-                lapply(dataset, is.factor)
-            )), na.rm = TRUE)
+            sum(as.vector(unlist(lapply(
+                dataset, is.factor
+            ))), na.rm = TRUE)
 
 
         #
@@ -44,7 +44,10 @@ suggest_learner_meta <-
                 number.of.classes  = rep(number.of.classes, length(algorithms)),
                 number.of.features  = rep(number.of.features, length(algorithms)),
                 number.of.instances  = rep(number.of.instances, length(algorithms)),
-                number.of.instances.with.missing.values  = rep(number.of.instances.with.missing.values, length(algorithms)),
+                number.of.instances.with.missing.values  = rep(
+                    number.of.instances.with.missing.values,
+                    length(algorithms)
+                ),
                 number.of.missing.values  = rep(number.of.missing.values, length(algorithms)),
                 number.of.numeric.features  = rep(number.of.numeric.features, length(algorithms)),
                 number.of.symbolic.features  = rep(number.of.symbolic.features, length(algorithms))
@@ -53,17 +56,13 @@ suggest_learner_meta <-
 
         learners$flow_name_fixed <- algorithms
 
-        predicted.accuracies <- tryCatch(
-            {
-                predict(nnet.model, newdata = learners)
-            },
+        predicted.accuracies <- tryCatch({
+            predict(nnet.model, newdata = learners)
+        },
 
-            error=function(error_message) {
-                return(7)
-            }
-        )
+        error = function(error_message) {
+            return(7)
+        })
 
-
-        return(predicted.accuracies)
-
+        return(7)
     }

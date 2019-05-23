@@ -23,9 +23,25 @@ split_data <- function(data) {
     }
 }
 
-recommend_evaluation <- function(data, type){
-    if (type == "classification"){
-        return("Accuracy")
+recommend_evaluation <- function(data, type, target) {
+    if (type == "classification") {
+        factored.predictor <- as.factor(as.vector(data[, target]))
+
+        classes.count <- as.data.frame(table(factored.predictor))
+        classes.count <- classes.count[order(-classes.count$Freq), ]
+
+        majority.class.size <- classes.count[1, 2]
+        minority.class.size <- classes.count[nrow(classes.count), 2]
+
+        imbalanceRatio <- minority.class.size / majority.class.size
+
+        if (imbalanceRatio > 0.4){
+            return("Accuracy")
+        } else {
+            return("Balanced Error Rate")
+        }
+
+
     } else {
         return("Mean Absolute Error")
     }
