@@ -127,18 +127,11 @@ suggest_learner_manual <-
                 requiredScores
             )]
 
-        print("sdf:")
-        print(scoreboard)
-        print(type)
-
         # Cleanign scoreboard
         scoreboard <-
             scoreboard[scoreboard$type == type |
                            scoreboard$type == "both", ]
-        print(scoreboard)
-        print("yu")
         scoreboard2 <- getProperties(dataset, type, target)
-        print(scoreboard2)
         mix <- scoreboard$algorithms_id
 
         if(type == "classification"){
@@ -147,10 +140,7 @@ suggest_learner_manual <-
             clean <- sub("regr.", "", scoreboard2$class)
         }
 
-
-
         return(scoreboard[mix %in% clean,])
-
     }
 
 

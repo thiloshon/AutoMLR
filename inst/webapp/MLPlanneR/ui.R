@@ -234,9 +234,15 @@ shinyUI(dashboardPage(
                                  h1("Breeded Models"),
                                  br(),
 
-                                 uiOutput("breedModels")
+                                 uiOutput("breedModels"),
 
+                                 div(id = "dataToConfigureDiv",
+                                     actionButton("breedTrain", "Next: Train Breeds")),
 
+                                 div(class = "progressStep", taskItem(
+                                     value = 60, color = "orange",
+                                     "Step 6 of 7"
+                                 ))
                              )
                          ))),
 

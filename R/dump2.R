@@ -1,3 +1,19 @@
+
+url <- "https://archive.ics.uci.edu/ml/machine-learning-databases/abalone/abalone.data"
+
+df <- read.table(url)
+dplyr::glimpse(df)
+
+write.csv(df, "ecoli.csv", row.names=FALSE)
+
+
+
+
+
+
+----------------------------------
+
+
 summarizeColumns(test)
 
 outliers package

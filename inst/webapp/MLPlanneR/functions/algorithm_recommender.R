@@ -12,17 +12,10 @@ suggest_learner <-
             return(list("Collect more records"))
         }
 
-        print("yee")
-
         scoreboard <- suggest_learner_manual(dataset, type = type, predictor)
-        print(scoreboard)
-
         temp <- suggest_learner_meta(dataset, type = type, predictor = predictor, scoreboard$meta_name)
 
-        print(temp)
         scoreboard$expected.accuracy <- temp
-
-
         scoreboard$expected.accuracy <- scoreboard$expected.accuracy * (scoreboard$meta_influenze / max(scoreboard$meta_influenze))
         scoreboard$expected.accuracy <- scoreboard$expected.accuracy * 10
         scoreboard$sum <- rowSums(scoreboard[, 6:ncol(scoreboard)])

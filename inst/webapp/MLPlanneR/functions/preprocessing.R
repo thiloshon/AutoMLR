@@ -66,11 +66,11 @@ recommend_preprocessing <- function(data, algorithm, breed) {
             stringsAsFactors = F
         )
 
-    pre <- outlierPre(data, F)
+    pre <- identifierPre(data, F)
     if (length(pre) > 0) {
         preproc[nrow(preproc) + 1,] <-
-            c("outlierPre",
-              "Outlier Removal",
+            c("identifierPre",
+              "Removing Identifiers",
               paste(pre, collapse = ", "),
               TRUE)
     }
@@ -84,20 +84,20 @@ recommend_preprocessing <- function(data, algorithm, breed) {
               TRUE)
     }
 
+    pre <- outlierPre(data, F)
+    if (length(pre) > 0) {
+        preproc[nrow(preproc) + 1,] <-
+            c("outlierPre",
+              "Outlier Removal",
+              paste(pre, collapse = ", "),
+              TRUE)
+    }
+
     pre <- imputePre(data, F)
     if (length(pre) > 0) {
         preproc[nrow(preproc) + 1,] <-
             c("imputePre",
               "Imputing Missing Values",
-              paste(pre, collapse = ", "),
-              TRUE)
-    }
-
-    pre <- identifierPre(data, F)
-    if (length(pre) > 0) {
-        preproc[nrow(preproc) + 1,] <-
-            c("identifierPre",
-              "Removing Identifiers",
               paste(pre, collapse = ", "),
               TRUE)
     }
@@ -120,6 +120,9 @@ recommend_preprocessing <- function(data, algorithm, breed) {
               TRUE)
     }
 
+    if(breed){
+
+    }
 
     return(preproc)
 }
@@ -151,8 +154,9 @@ outlierPre <- function(data, perform = T) {
             data[, col] <- temp
         }
 
+        d <- imputePre(data)
 
-        return(imputePre(data))
+        return(d)
 
     } else {
         return(colnames(outliers)[colSums(outliers == T, na.rm = T) > 0])
@@ -180,11 +184,12 @@ factorPre <- function(data, perform = T) {
         score <- distinct_vals / nrow(data)
 
         if (perform) {
-            if (distinct_vals == 2 | score < 0.05) {
+            # if (distinct_vals == 2 | score < 0.05) {
+            if (distinct_vals < 5 | score < 0.005) {
                 data[, var] <- as.factor(data[, var])
             }
         } else {
-            if (distinct_vals == 2 | score < 0.05) {
+            if (distinct_vals < 5 | score < 0.005) {
                 retVar <- c(retVar, var)
             }
         }

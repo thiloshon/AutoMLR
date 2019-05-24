@@ -10,7 +10,8 @@ MLPlan <-
             target = "character",
             data.meta = "list",
             ml.pipelines = "list",
-            evaluation = "character"
+            evaluation = "character",
+            results = "data.frame"
         ),
         methods = list(
             initialize = function(type = "classification") {
@@ -86,15 +87,21 @@ MLPlan <-
 
             split = function() {
                 for (pipe in .self$ml.pipelines) {
-                    pipe$addSplit(makeResampleDesc("Holdout", split = split_data(pipe$data)))
+
+                    if(length(pipe$train.split) == 0){
+                        pipe$addSplit(makeResampleDesc("Holdout", split = split_data(pipe$data)))
+                    }
+
                 }
             },
 
             preprocess = function() {
                 for (pipe in .self$ml.pipelines) {
-                    for (row in 1:nrow(pipe$preprocessing)) {
-                        dataTemp <- do.call(pipe$preprocessing[row, 1], list(data = pipe$data, perform = T))
-                        pipe$setData(dataTemp)
+                    if(length(pipe$data) == 0){
+                        for (row in 1:nrow(pipe$preprocessing)) {
+                            dataTemp <- do.call(pipe$preprocessing[row, 1], list(data = pipe$data, perform = T))
+                            pipe$setData(dataTemp)
+                        }
                     }
                 }
 
@@ -105,53 +112,54 @@ MLPlan <-
             train = function() {
                 configureMlr(on.learner.error = "warn")
 
-
                 for (pipe in .self$ml.pipelines) {
-                    dataTemp <- subset(pipe$data, subset = !is.na(pipe$data[.self$target]))
+                    if(length(pipe$mlr.task) == 0){
+                        dataTemp <- subset(pipe$data, subset = !is.na(pipe$data[.self$target]))
 
-                    if (.self$type == "classification") {
-                        classif.task = mlr::makeClassifTask(
-                            id = pipe$id,
-                            data = dataTemp,
-                            target = .self$target
-                        )
-                        pipe$addMLRTask(classif.task)
+                        if (.self$type == "classification") {
+                            classif.task = mlr::makeClassifTask(
+                                id = pipe$id,
+                                data = dataTemp,
+                                target = .self$target
+                            )
+                            pipe$addMLRTask(classif.task)
 
-                        # Classification tree, set it up for predicting probabilities
-                        classif.lrn = mlr::makeLearner(
-                            pipe$learner,
-                            predict.type = "response",
-                            fix.factors.prediction = TRUE
-                        )
-                        pipe$addMLRLearner(classif.lrn)
+                            # Classification tree, set it up for predicting probabilities
+                            classif.lrn = mlr::makeLearner(
+                                pipe$learner,
+                                predict.type = "response",
+                                fix.factors.prediction = TRUE
+                            )
+                            pipe$addMLRLearner(classif.lrn)
 
-                        mod = mlr::resample(
-                            classif.lrn,
-                            classif.task,
-                            pipe$train.split[[1]],
-                            measures = list(ber, acc, timetrain)
-                        )
-                        pipe$addMLRModel(mod)
+                            mod = mlr::resample(
+                                classif.lrn,
+                                classif.task,
+                                pipe$train.split[[1]],
+                                measures = list(ber, acc, timetrain)
+                            )
+                            pipe$addMLRModel(mod)
 
-                    } else if (.self$type == "regression") {
-                        regr.task = mlr::makeRegrTask(
-                            id = pipe$id,
-                            data = dataTemp,
-                            target = .self$target
-                        )
-                        pipe$addMLRTask(regr.task)
+                        } else if (.self$type == "regression") {
+                            regr.task = mlr::makeRegrTask(
+                                id = pipe$id,
+                                data = dataTemp,
+                                target = .self$target
+                            )
+                            pipe$addMLRTask(regr.task)
 
-                        # Regression gradient boosting machine, specify hyperparameters via a list
-                        regr.lrn = mlr::makeLearner(pipe$learner)
-                        pipe$addMLRLearner(regr.lrn)
+                            regr.lrn = mlr::makeLearner(pipe$learner)
+                            pipe$addMLRLearner(regr.lrn)
 
-                        mod = mlr::resample(regr.lrn,
-                                            regr.task,
-                                            pipe$train.split[[1]],
-                                            measures = list(mae, mse, timetrain))
-                        pipe$addMLRModel(mod)
+                            mod = mlr::resample(regr.lrn,
+                                                regr.task,
+                                                pipe$train.split[[1]],
+                                                measures = list(mae, mse, timetrain))
+                            pipe$addMLRModel(mod)
+                        }
 
                     }
+
                 }
             },
 
@@ -177,6 +185,9 @@ MLPlan <-
 
 
                 }
+
+                .self$results <- benchmark
+
                 return(benchmark)
 
             },

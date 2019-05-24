@@ -170,7 +170,7 @@ shinyServer(function(input, output, session) {
         split <- split_data(dataStore$mlPlan$data)
 
 
-        for (i in 1:10) {
+        for (i in 1:nrow(algorithms)) {
             preproc <-
                 recommend_preprocessing(dataStore$mlPlan$data,
                                         algorithms$algorithms_id[1],
@@ -230,93 +230,98 @@ shinyServer(function(input, output, session) {
 
 
     observeEvent(input$breed.models, {
+        components <- list()
+        prefix <-
+            ifelse(dataStore$learning.type == "classification",
+                   "classif",
+                   "regr")
+
+        split <- split_data(dataStore$mlPlan$data)
+
+        algorithms <-
+            read.csv("C:/Users/Thiloshon/RProjects/rautoalgo/inst/algorithms scoring.csv")
+
+        for (algo in input$trainSelect) {
+            temp <- algo
+            preproc <-
+                recommend_preprocessing(dataStore$mlPlan$data, temp, F)
+
+            empty <- FALSE
+
+
+            for (mod in 1:4) {
+                preprocString <- list()
+                count <- nrow(preproc)
+                pre <- preproc[sample(1:count, (count * 0.25 * mod )), ]
+
+                for (d in 1:nrow(pre)) {
+                    if(nrow(pre) == 0 & !empty){
+                        preprocString[[length(preprocString) + 1]] <-
+                            tags$p("None")
+                        empty <- T
+                    }else {
+                        preprocString[[length(preprocString) + 1]] <-
+                            tags$p(paste(pre[d, 2], "on", pre[d, 3]))
+                    }
+                }
+
+                components[[length(components) + 1]] <- tagList(
+                    HTML(
+                        paste(
+                            "<input type=checkbox
+                        name=breedSelect value=",
+                            temp,
+                            ">"
+                        )
+                    ),
+                    div(
+                        class = "checksListContent",
+                        h4(algorithms[which(algorithms$algorithms_id == temp), 2]),
+
+                        div(class = "checksListTopic col-sm-3", p("Preprocessing: ")),
+                        div(class = "checksListTitle",
+                            preprocString),
+                        div(class = "checksListTopic col-sm-3", p("Train / Test Split: ")),
+                        div(class = "checksListTitle",
+                            p(paste(
+                                split * 100, "/", 100 - (split * 100)
+                            ))),
+
+                        div(class = "checksListTopic col-sm-3", p("Evaluation Metric")),
+                        div(class = "checksListTitle",
+                            p(
+                                dataStore$mlPlan$evaluation
+                            ))
+                    ),
+                    br(),
+                    br()
+                )
+            }
+        }
+
+        output$breedModels <- renderUI({
+            return(
+                div(
+                    id = "breedSelect",
+                    class = "form-group shiny-input-checkboxgroup shiny-input-container shiny-bound-input",
+                    tags$br(),
+                    tags$br(),
+                    column(width = 12,
+                           components)
+                )
+            )
+        })
+
+        # pipe <- PipeLine(paste(prefix, temp, sep = "."), paste(temp, "-", mod, sep = ""))
+        # dataStore$mlPlan$addPipe(pipe)
+        # dataStore$mlPlan$split()
+        # pipe$addPreprocessing(preproc)
+        #
         updateTabItems(session, "sideBar", "breed")
     })
 
 
-    output$breedModels <- renderUI({
-        components <- list()
 
-        for (i in 1:5) {
-            components[[i]] <- tagList(
-                HTML(
-                    paste(
-                        "<input type=checkbox
-                        name=algoSelect value=",
-                        i,
-                        ">"
-                    )
-                ),
-                div(
-                    class = "checksListContent",
-                    h4('Neural Net'),
-
-                    div(class = "checksListTopic col-sm-3", p("Preprocessing: ")),
-                    div(class = "checksListTitle",
-                        p(ifelse(
-                            i == 1,
-                            c("None"),
-                            ifelse(
-                                i == 2,
-                                c(
-                                    "Removing features with constant values,
-                                Normalizing numerical features,
-                                Merging small factors into one big factor level,
-                                Cutting off large values like 'infinity'"
-                                ),
-                                ifelse(
-                                    i == 3,
-                                    c(
-                                        "Creating dummy features for factors,
-                                Removing columns,
-                                Factoring features with encoding,
-                                Binning continous variables to levels,
-                                Imputing missing values"
-                                    ),
-                                    ifelse(
-                                        i == 4,
-                                        c("Normalizing numerical features"),
-                                        c(
-                                            "Removing features with constant values,
-                                Normalizing numerical features,
-                                Merging small factors into one big factor level,
-                                Cutting off large values like 'infinity',
-                                Creating dummy features for factors,
-                                Removing columns,
-                                Factoring features with encoding,
-                                Binning continous variables to levels,
-                                Imputing missing values"
-                                        )
-                                    )
-                                )
-                            )
-
-                        ))),
-
-                    div(class = "checksListTopic col-sm-3", p("Train / Test Split: ")),
-                    div(class = "checksListTitle",
-                        p("80 / 20")),
-
-                    div(class = "checksListTopic col-sm-3", p("Evaluation Metric")),
-                    div(class = "checksListTitle",
-                        p("Accuracy"))
-                ),
-                br(),
-                br()
-            )
-        }
-
-        return(
-            div(
-                id = "algoSelect",
-                class = "form-group shiny-input-checkboxgroup shiny-input-container shiny-bound-input",
-                tags$br(),
-                tags$br(),
-                column(width = 12,
-                       components)
-            )
-        )
-    })
 
     observeEvent(input$dataToConfigure, {
         prefix <-
@@ -440,7 +445,7 @@ shinyServer(function(input, output, session) {
                     paste(
                         "<input type=checkbox
                         name=trainSelect value=",
-                        data$index[i],
+                        data$algo[i],
                         ">"
                     )
                 ),
@@ -466,6 +471,7 @@ shinyServer(function(input, output, session) {
 
         return(div(
             id = "trainSelect",
+            class = "form-group shiny-input-checkboxgroup shiny-input-container shiny-bound-input",
             tags$br(),
             tags$br(),
             column(width = 12,
