@@ -1,17 +1,28 @@
+#' Suggest algorithms based on meta learninng technique.
+#'
+#' @return expected performance score for the dataset and algorithm
+#'
+#' @examples
+#'
+#' val <- suggest_learner_meta(data, "classsification", "Species", "nnet")
+#'
+#' @export
 suggest_learner_meta <-
     function(dataset, type = "classification", predictor, algorithms) {
+        # load learned model
         load("functions/algorithm-recommender-model.RData")
 
         if (is.na(predictor)) {
             stop("Give a predictor variable")
         }
 
+        expec_perf <- 7
         dataset <- as.data.frame(dataset)
-
         factored.predictor <- as.factor(dataset[, predictor])
 
+        # Create meta to pass for prediction
         classes.count <- as.data.frame(table(factored.predictor))
-        classes.count <- classes.count[order(-classes.count$Freq), ]
+        classes.count <- classes.count[order(-classes.count$Freq),]
 
         majority.class.size <- classes.count[1, 2]
         minority.class.size <- classes.count[nrow(classes.count), 2]
@@ -35,7 +46,7 @@ suggest_learner_meta <-
             ))), na.rm = TRUE)
 
 
-        #
+        # Create prediction dataset
         learners <-
             data.frame(
                 majority.class.size  = rep(majority.class.size, length(algorithms)),
@@ -56,13 +67,14 @@ suggest_learner_meta <-
 
         learners$flow_name_fixed <- algorithms
 
+        # get expected performance
         predicted.accuracies <- tryCatch({
             predict(nnet.model, newdata = learners)
         },
 
         error = function(error_message) {
-            return(7)
+            return(expec_perf)
         })
 
-        return(7)
+        return(expec_perf)
     }

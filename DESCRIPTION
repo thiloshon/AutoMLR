@@ -1,12 +1,23 @@
-Package: rautoalgo
+Package: automlr
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
-Encoding: UTF-8
-LazyData: true
+Title: Automated Machine Learning System in R
+Description: Provides web UI to train regression and classification models.
+Version: 0.0.17
+Date: 2019-04-21
+License: GPL-3
+Authors@R: c(
+    person(
+        "Thiloshon", "Nagarajah",
+        email = "thiloshon@gmail.com",
+        role = c("aut","cre")),
+    person(
+        "Guhanathan", "Poravi", 
+        email = "guhanathan.p@iit.ac.lk",
+        role = c("aut"),
+        comment = c(ORCID = '0000-0003-1557-8596'))
+    )
+Maintainer: Thiloshon Nagarajah <thiloshon@gmail.com>
+Imports: rmarkdown, knitr, shiny, shinydashboard, shinyjs, DT, data.table, mlr, graphics, methods, stats, utils
+Depends: R (>= 2.10)
 RoxygenNote: 6.1.1
+LazyData: true

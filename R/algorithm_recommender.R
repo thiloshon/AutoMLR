@@ -1,21 +1,10 @@
-
-
-
-#' Recommending learners based on dataset.
+#' Suggest algorithms based on hybrid approach.
 #'
-#' Recommends machine learning algorithm best fitting for the given
-#' dataset and learning type.
-#'
-#' @param dataset The dataset to train as a data frame
-#' @param type Type of machine learning, either regression or classsification
-#' @param predictor The target feature as character
-#'
-#' @return data frame of algorithms and thier ranks
+#' @return expected performance score for the dataset and algorithms
 #'
 #' @examples
 #'
-#' ranking <- suggest_learner(iris, "classification", "Species")
-#' ranking <- suggest_learner(cars, "regression", "mpg")
+#' val <- suggest_learner(data, "classsification", "Species")
 #'
 #' @export
 suggest_learner <-
@@ -31,23 +20,26 @@ suggest_learner <-
             return(list("Collect more records"))
         }
 
+        # get recommendations
+        scoreboard <-
+            suggest_learner_manual(dataset, type = type, predictor)
+        temp <-
+            suggest_learner_meta(dataset,
+                                 type = type,
+                                 predictor = predictor,
+                                 scoreboard$meta_name)
 
-        scoreboard <- suggest_learner_manual(dataset, type = type)
-
-        # removing non type algorithms
-
-        scoreboard <- scoreboard[scoreboard$type == type | scoreboard$type == "both", ]
-
-
-        #scoreboard$expected.accuracy <-
-            #suggest_learner_meta(dataset, type = type, predictor = predictor, scoreboard$meta_name)
-
-        print(scoreboard)
-
-
+        # add metainfluenzer score
+        scoreboard$expected.accuracy <- temp
+        scoreboard$expected.accuracy <-
+            scoreboard$expected.accuracy * (scoreboard$meta_influenze / max(scoreboard$meta_influenze))
+        scoreboard$expected.accuracy <-
+            scoreboard$expected.accuracy * 10
         scoreboard$sum <- rowSums(scoreboard[, 6:ncol(scoreboard)])
+        scoreboard <- scoreboard[order(-scoreboard$sum), ]
 
-        scoreboard <- scoreboard[order(-scoreboard$sum),]
+        message("Scores of algorithms: ")
+        print(scoreboard)
 
         return(scoreboard)
     }

@@ -11,6 +11,8 @@ source("functions/preprocessing.R")
 options(scipen = 999)
 
 shinyServer(function(input, output, session) {
+
+    # main data storage
     dataStore <-
         list(
             learning.type = "classification",
@@ -21,6 +23,7 @@ shinyServer(function(input, output, session) {
     showModal(modalDialog(img(src = "82.png", align = "center")))
 
 
+    # Classifiaction is selected
     observeEvent(input$deploy.classification, {
         if (input$deploy.classification[[1]] > 0) {
             dataStore$learning.type <<- "classification"
@@ -34,6 +37,7 @@ shinyServer(function(input, output, session) {
         updateTabsetPanel(session, "mlplan", selected = "select.data")
     })
 
+    # regression is selected
     observeEvent(input$deploy.regression, {
         if (input$deploy.classification[[1]] > 0) {
             dataStore$learning.type <<- "classification"
@@ -47,7 +51,7 @@ shinyServer(function(input, output, session) {
         updateTabsetPanel(session, "mlplan", selected = "select.data")
     })
 
-
+    # input file is given
     observeEvent(input$inputFile, {
         withProgress(message = paste("Reading", input$inputFile$name, "..."), {
             if (is.null(input$inputFile))
@@ -60,7 +64,7 @@ shinyServer(function(input, output, session) {
         })
     })
 
-
+    # input file is selected
     observeEvent(input$select.data.button, {
         dataStore$inputReceived <<- TRUE
         dataStore$mlPlan$addData(data.table::fread(input$inputFile$datapath))
@@ -70,6 +74,7 @@ shinyServer(function(input, output, session) {
         updateTabsetPanel(session, "mlplan", selected = "select.target.tab")
     })
 
+    # target value is selected
     observeEvent(input$select.target.button, {
         dataStore$mlPlan$addTarget(as.numeric(input$selected.target))
         dataStore$mlPlan$addEvaluation(
@@ -80,12 +85,11 @@ shinyServer(function(input, output, session) {
             )
         )
 
-
         updateTabItems(session, "sideBar", "pipes")
         updateTabsetPanel(session, "mlpipes", selected = "data.split")
     })
 
-
+    # possible targets are listed
     output$target.variables <- renderUI({
         components <- list(selectInput(
             "selected.target",
@@ -107,6 +111,7 @@ shinyServer(function(input, output, session) {
         )
     })
 
+    # Target graph is shown
     output$target.plots <- renderPlot({
         if (dataStore$learning.type == "classification") {
             suppressWarnings(
@@ -140,23 +145,9 @@ shinyServer(function(input, output, session) {
                     )
             )
         }
-
     })
 
-    output$split.range <- renderPrint({
-        train <-
-            as.integer(input$slider2 * nrow(dataStore$mlPlan$data) / 100)
-        test <- nrow(dataStore$mlPlan$data) - train
-
-        # dataStore$mlPlan$addSplit(train)
-
-        # print(dataStore$mlPlan$train.split)
-
-        paste("Train Data : ", train,
-              " and Test Data : ", test)
-    })
-
-
+    # Recommended algorithms are shown
     output$qualityChecks <- renderUI({
         components <- list()
 
@@ -165,10 +156,7 @@ shinyServer(function(input, output, session) {
                             dataStore$learning.type,
                             dataStore$mlPlan$target)
 
-        #message(algorithms)
-
         split <- split_data(dataStore$mlPlan$data)
-
 
         for (i in 1:nrow(algorithms)) {
             preproc <-
@@ -227,8 +215,110 @@ shinyServer(function(input, output, session) {
         )
     })
 
+    # Algorithms are selected
+    observeEvent(input$dataToConfigure, {
+        prefix <-
+            ifelse(dataStore$learning.type == "classification",
+                   "classif",
+                   "regr")
+
+        for (algo in input$algoSelect) {
+            temp <- gsub("^\\s+|\\s+$", "", algo)
+            pipe <- PipeLine(paste(prefix, temp, sep = "."), temp)
+
+            preproc <-
+                recommend_preprocessing(dataStore$mlPlan$data, algo, F)
+
+            pipe$addPreprocessing(preproc)
+
+            dataStore$mlPlan$addPipe(pipe)
+
+        }
+        dataStore$mlPlan$split()
+        updateTabItems(session, "sideBar", "play")
+    })
+
+    # Algorithms are trained and evaluated
+    output$evaluations <- renderUI({
+        withProgress(message = "Training and testing models...", {
+            dataStore$mlPlan$preprocess()
+            dataStore$mlPlan$train()
+        })
+
+        data <- dataStore$mlPlan$benchmark()
+        data$index <- c(1:nrow(data))
+
+        isAccuracy <-
+            dataStore$mlPlan$evaluation == "Accuracy"
+        isBalanceError <- dataStore$mlPlan$evaluation == "Balanced Error Rate"
+
+        if (isAccuracy) {
+            data <- data[order(-data$acc.test.mean), ]
+        } else if (isBalanceError) {
+            data <- data[order(data$ber.test.mean), ]
+        } else {
+            data <- data[order(data$mae.test.mean), ]
+        }
+
+        components <- list()
+
+        for (i in 1:nrow(data)) {
+            value <-
+                ifelse(
+                    isAccuracy,
+                    as.numeric(data$acc.test.mean[i]) * 100,
+                    ifelse(
+                        isBalanceError,
+                        as.numeric(data$ber.test.mean[i]),
+                        as.numeric(data$mae.test.mean[i])
+                    )
+                )
+            label <-
+                ifelse(
+                    isAccuracy,
+                    "Out of Sample Accuracy: ",
+                    ifelse(isBalanceError, "Balanced Error Rate", "Mean Absolute Error: ")
+                )
+            components[[i]] <- tagList(
+                HTML(
+                    paste(
+                        "<input type=checkbox
+                        name=trainSelect value=",
+                        data$algo[i],
+                        ">"
+                    )
+                ),
+                div(
+                    class = "checksListContent",
+                    h4(data$name[i]),
+
+                    div(class = "checksListTopic col-sm-3", p(label)),
+                    div(class = "checksListTitle",
+                        p(value)),
+
+                    div(class = "checksListTopic col-sm-3", p("Training Duration")),
+                    div(class = "checksListTitle",
+                        p(
+                            paste(data$totalTime[i], "Seconds")
+                        ))
+                ),
+                br(),
+                br()
+            )
+        }
+
+        return(div(
+            id = "trainSelect",
+            class = "form-group shiny-input-checkboxgroup shiny-input-container shiny-bound-input",
+            tags$br(),
+            tags$br(),
+            column(width = 12,
+                   components)
+        ))
+    })
 
 
+    # Breeding algorithms are shown
     observeEvent(input$breed.models, {
         components <- list()
         prefix <-
@@ -239,7 +329,7 @@ shinyServer(function(input, output, session) {
         split <- split_data(dataStore$mlPlan$data)
 
         algorithms <-
-            read.csv("C:/Users/Thiloshon/RProjects/rautoalgo/inst/algorithms scoring.csv")
+            read.csv("functions/algorithms scoring.csv")
 
         for (algo in input$trainSelect) {
             temp <- algo
@@ -322,36 +412,7 @@ shinyServer(function(input, output, session) {
 
 
 
-
-    observeEvent(input$dataToConfigure, {
-        prefix <-
-            ifelse(dataStore$learning.type == "classification",
-                   "classif",
-                   "regr")
-
-        for (algo in input$algoSelect) {
-            temp <- gsub("^\\s+|\\s+$", "", algo)
-            pipe <- PipeLine(paste(prefix, temp, sep = "."), temp)
-
-            preproc <-
-                recommend_preprocessing(dataStore$mlPlan$data, algo, F)
-
-            pipe$addPreprocessing(preproc)
-
-            dataStore$mlPlan$addPipe(pipe)
-
-        }
-
-        dataStore$mlPlan$split()
-
-        updateTabItems(session, "sideBar", "play")
-
-        # dataStore$mlPlan$train()
-        #dataStore$mlPlan$test()
-
-        #dataStore$mlPlan$printSelf()
-    })
-
+    #  artifacts are generated
     observeEvent(input$train.models, {
         updateTabItems(session, "sideBar", "document")
         generate_detailed_report(dataStore)
@@ -359,6 +420,7 @@ shinyServer(function(input, output, session) {
 
     })
 
+    # Report is generated
     generate_detailed_report <-
         function(dataStore) {
             withProgress(message = "Preparing Reports and Artifacts...", {
@@ -373,6 +435,7 @@ shinyServer(function(input, output, session) {
             })
         }
 
+    # Code is generated
     generate_code_report <-
         function(dataStore) {
             withProgress(message = "Preparing Reports and Artifacts...", {
@@ -387,102 +450,7 @@ shinyServer(function(input, output, session) {
             })
         }
 
-
-
-    output$downloadInput <- downloadHandler(
-        filename = function() {
-            paste("inputData-", Sys.Date(), ".csv")
-        },
-        content = function(con) {
-            write.csv(dataStore$mlPlan$data, con)
-        }
-    )
-
-
-
-    output$evaluations <- renderUI({
-        withProgress(message = "Training and testing models...", {
-            dataStore$mlPlan$preprocess()
-            dataStore$mlPlan$train()
-        })
-
-        data <- dataStore$mlPlan$benchmark()
-        data$index <- c(1:nrow(data))
-
-        isAccuracy <-
-            dataStore$mlPlan$evaluation == "Accuracy"
-        isBalanceError <- dataStore$mlPlan$evaluation == "Balanced Error Rate"
-
-        if (isAccuracy) {
-            data <- data[order(-data$acc.test.mean), ]
-        } else if (isBalanceError) {
-            data <- data[order(data$ber.test.mean), ]
-        } else {
-            data <- data[order(data$mae.test.mean), ]
-        }
-
-        components <- list()
-
-        for (i in 1:nrow(data)) {
-            value <-
-                ifelse(
-                    isAccuracy,
-                    as.numeric(data$acc.test.mean[i]) * 100,
-                    ifelse(
-                        isBalanceError,
-                        as.numeric(data$ber.test.mean[i]),
-                        as.numeric(data$mae.test.mean[i])
-                    )
-                )
-            label <-
-                ifelse(
-                    isAccuracy,
-                    "Out of Sample Accuracy: ",
-                    ifelse(isBalanceError, "Balanced Error Rate", "Mean Absolute Error: ")
-                )
-            components[[i]] <- tagList(
-                HTML(
-                    paste(
-                        "<input type=checkbox
-                        name=trainSelect value=",
-                        data$algo[i],
-                        ">"
-                    )
-                ),
-                div(
-                    class = "checksListContent",
-                    h4(data$name[i]),
-
-                    div(class = "checksListTopic col-sm-3", p(label)),
-                    div(class = "checksListTitle",
-                        p(value)),
-
-                    div(class = "checksListTopic col-sm-3", p("Training Duration")),
-                    div(class = "checksListTitle",
-                        p(
-                            paste(data$totalTime[i], "Seconds")
-                        ))
-                ),
-                br(),
-                br()
-
-            )
-        }
-
-        return(div(
-            id = "trainSelect",
-            class = "form-group shiny-input-checkboxgroup shiny-input-container shiny-bound-input",
-            tags$br(),
-            tags$br(),
-            column(width = 12,
-                   components)
-        ))
-
-
-    })
-
-
-
+    # Artifacts are shown
     output$documentContentUI <- renderUI({
         input$flagButton
         tagList(tabsetPanel(
@@ -524,7 +492,6 @@ shinyServer(function(input, output, session) {
                 includeMarkdown("Report/generateDetailedReport.md")
             ),
 
-
             tabPanel(
                 "Source Code",
                 div(class = "secondaryHeaders", h3(
@@ -537,6 +504,18 @@ shinyServer(function(input, output, session) {
         ))
     })
 
+
+    # Data is downloaded
+    output$downloadInput <- downloadHandler(
+        filename = function() {
+            paste("inputData-", Sys.Date(), ".csv")
+        },
+        content = function(con) {
+            write.csv(dataStore$mlPlan$data, con)
+        }
+    )
+
+    # models are downloaded
     output$downloadModels <- downloadHandler(
         filename = function() {
             paste("models-", Sys.Date(), ".RData", sep = "")
@@ -551,6 +530,7 @@ shinyServer(function(input, output, session) {
         }
     )
 
+    # report is downloaded
     output$downloadShortReport <- downloadHandler(
         filename = function() {
             paste("automated-training-report-",
@@ -565,13 +545,7 @@ shinyServer(function(input, output, session) {
     )
 
 
-
-
     # ------------------REFERENCE POINT-----------------
-
-
-
-
 
 
 
@@ -582,7 +556,4 @@ shinyServer(function(input, output, session) {
     output$class <- reactive({
         return(input$deploy.classification[[1]])
     })
-
-
-
 })

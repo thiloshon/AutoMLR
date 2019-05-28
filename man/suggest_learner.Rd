@@ -2,27 +2,18 @@
 % Please edit documentation in R/algorithm_recommender.R
 \name{suggest_learner}
 \alias{suggest_learner}
-\title{Recommending learners based on dataset.}
+\title{Suggest algorithms based on hybrid approach.}
 \usage{
 suggest_learner(dataset, type = "regression", predictor)
 }
-\arguments{
-\item{dataset}{The dataset to train as a data frame}
-
-\item{type}{Type of machine learning, either regression or classsification}
-
-\item{predictor}{The target feature as character}
-}
 \value{
-data frame of algorithms and thier ranks
+expected performance score for the dataset and algorithms
 }
 \description{
-Recommends machine learning algorithm best fitting for the given
-dataset and learning type.
+Suggest algorithms based on hybrid approach.
 }
 \examples{
 
-ranking <- suggest_learner(iris, "classification", "Species")
-ranking <- suggest_learner(cars, "regression", "mpg")
+val <- suggest_learner(data, "classsification", "Species")
 
 }

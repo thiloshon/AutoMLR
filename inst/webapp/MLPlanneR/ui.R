@@ -3,9 +3,7 @@ suppressPackageStartupMessages(library(shinyjs))
 suppressPackageStartupMessages(library(shinydashboard))
 suppressPackageStartupMessages(library(leaflet))
 library(DT)
-library(kernlab)
-library(extraTrees)
-library(FNN)
+
 
 
 shinyUI(dashboardPage(

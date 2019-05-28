@@ -28,14 +28,16 @@ recommend_evaluation <- function(data, type, target) {
         factored.predictor <- as.factor(as.vector(data[, target]))
 
         classes.count <- as.data.frame(table(factored.predictor))
-        classes.count <- classes.count[order(-classes.count$Freq), ]
+        classes.count <- classes.count[order(-classes.count$Freq),]
 
         majority.class.size <- classes.count[1, 2]
         minority.class.size <- classes.count[nrow(classes.count), 2]
 
         imbalanceRatio <- minority.class.size / majority.class.size
 
-        if (imbalanceRatio > 0.4){
+        message("Imbalance ratio: ", imbalanceRatio)
+
+        if (imbalanceRatio > 0.4) {
             return("Accuracy")
         } else {
             return("Balanced Error Rate")
@@ -68,7 +70,7 @@ recommend_preprocessing <- function(data, algorithm, breed) {
 
     pre <- identifierPre(data, F)
     if (length(pre) > 0) {
-        preproc[nrow(preproc) + 1,] <-
+        preproc[nrow(preproc) + 1, ] <-
             c("identifierPre",
               "Removing Identifiers",
               paste(pre, collapse = ", "),
@@ -77,16 +79,18 @@ recommend_preprocessing <- function(data, algorithm, breed) {
 
     pre <- factorPre(data, F)
     if (length(pre) > 0) {
-        preproc[nrow(preproc) + 1,] <-
+        preproc[nrow(preproc) + 1, ] <-
             c("factorPre",
               "Factorization",
               paste(pre, collapse = ", "),
               TRUE)
     }
 
+    print(algorithm)
+
     pre <- outlierPre(data, F)
     if (length(pre) > 0) {
-        preproc[nrow(preproc) + 1,] <-
+        preproc[nrow(preproc) + 1, ] <-
             c("outlierPre",
               "Outlier Removal",
               paste(pre, collapse = ", "),
@@ -95,7 +99,7 @@ recommend_preprocessing <- function(data, algorithm, breed) {
 
     pre <- imputePre(data, F)
     if (length(pre) > 0) {
-        preproc[nrow(preproc) + 1,] <-
+        preproc[nrow(preproc) + 1, ] <-
             c("imputePre",
               "Imputing Missing Values",
               paste(pre, collapse = ", "),
@@ -104,7 +108,7 @@ recommend_preprocessing <- function(data, algorithm, breed) {
 
     pre <- skewPre(data, F)
     if (length(pre) > 0) {
-        preproc[nrow(preproc) + 1,] <-
+        preproc[nrow(preproc) + 1, ] <-
             c("skewPre",
               "Fixing Skeweness",
               paste(pre, collapse = ", "),
@@ -113,14 +117,14 @@ recommend_preprocessing <- function(data, algorithm, breed) {
 
     pre <- normalizePre(data, F)
     if (length(pre) > 0) {
-        preproc[nrow(preproc) + 1,] <-
+        preproc[nrow(preproc) + 1, ] <-
             c("normalizePre",
               "Normalization ",
               paste(pre, collapse = ", "),
               TRUE)
     }
 
-    if(breed){
+    if (breed) {
 
     }
 
@@ -223,7 +227,7 @@ imputePre <- function(data, perform = T) {
         return()
     }
 
-    na_ratio <- na_ratio[(na_ratio[, 1] != 0), ]
+    na_ratio <- na_ratio[(na_ratio[, 1] != 0),]
 
     cols <- rownames(na_ratio)[(na_ratio[, 1] < 0.45)]
 
@@ -259,7 +263,7 @@ identifierPre <- function(data, perform = T) {
     cols <- names[endsWith(names, "id")]
 
     if (perform) {
-        return(data[,!(names(data) %in% cols)])
+        return(data[, !(names(data) %in% cols)])
     } else {
         return(cols)
     }
@@ -290,7 +294,8 @@ skewPre <- function(data, perform = T) {
         for (var in cols) {
             skew <- e1071::skewness(data[, var], na.rm = T)
             if (!is.na(skew) & abs(skew) > 0.4) {
-                data[,var] <- log1p(data[,var])
+                # Log transformation
+                data[, var] <- log1p(data[, var])
             }
         }
         return(data)

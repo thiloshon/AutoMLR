@@ -1,6 +1,9 @@
-library(tibble)
-library(mlr)
-
+#' MLPlan r6 class.
+#'
+#' @return MLPlan object with default settings
+#'
+#'
+#' @export
 MLPlan <-
     setRefClass(
         "MLPlan",
@@ -29,6 +32,7 @@ MLPlan <-
                     .self$target <- target
                 }
 
+                # add meta for report
                 getMeta()
             },
 
@@ -36,13 +40,14 @@ MLPlan <-
                 dataset <- .self$data
                 predictor <- .self$target
 
+                # get meta for classification data
                 if (.self$type == "classification") {
                     factored.predictor <- as.factor(as.vector(dataset[, predictor]))
 
                     classes.count <-
                         as.data.frame(table(factored.predictor))
                     classes.count <-
-                        classes.count[order(-classes.count$Freq), ]
+                        classes.count[order(-classes.count$Freq),]
 
                     .self$data.meta$number.of.classes <-
                         nrow(classes.count)
@@ -51,11 +56,9 @@ MLPlan <-
                     .self$data.meta$minority.class.size <-
                         classes.count[nrow(classes.count), 2]
 
-                } else {
-                    # Regression
-
                 }
 
+                # meta for general data
                 .self$data.meta$number.of.features <- ncol(dataset)
                 .self$data.meta$number.of.instances <- nrow(dataset)
                 .self$data.meta$number.of.instances.with.missing.values <-
@@ -71,8 +74,6 @@ MLPlan <-
                         dataset, is.factor
                     ))), na.rm = TRUE)
 
-
-
             },
 
             addPipe = function(pipeline) {
@@ -81,41 +82,46 @@ MLPlan <-
                     c(.self$ml.pipelines, pipeline)
             },
 
-            addEvaluation = function(eval){
+            addEvaluation = function(eval) {
                 .self$evaluation <- eval
             },
 
+            # data resample based on data size
             split = function() {
                 for (pipe in .self$ml.pipelines) {
-
-                    if(length(pipe$train.split) == 0){
+                    if (length(pipe$train.split) == 0) {
                         pipe$addSplit(makeResampleDesc("Holdout", split = split_data(pipe$data)))
                     }
-
                 }
             },
 
+            # data preprocessing step
             preprocess = function() {
                 for (pipe in .self$ml.pipelines) {
-                    if(length(pipe$data) == 0){
-                        for (row in 1:nrow(pipe$preprocessing)) {
-                            dataTemp <- do.call(pipe$preprocessing[row, 1], list(data = pipe$data, perform = T))
-                            pipe$setData(dataTemp)
-                        }
+                    for (row in 1:nrow(pipe$preprocessing)) {
+                        # call each preprocessing function with data as argumetn
+                        dataTemp <-
+                            do.call(pipe$preprocessing[row, 1],
+                                    list(data = pipe$data, perform = T))
+                        pipe$setData(dataTemp)
                     }
                 }
 
-                print("Data after preprocessing: ")
+                message("Data after preprocessing: ")
                 print(head(.self$ml.pipelines[[1]]$data))
             },
 
+            # Training and testing
             train = function() {
                 configureMlr(on.learner.error = "warn")
 
                 for (pipe in .self$ml.pipelines) {
-                    if(length(pipe$mlr.task) == 0){
-                        dataTemp <- subset(pipe$data, subset = !is.na(pipe$data[.self$target]))
+                    if (length(pipe$mlr.task) == 0) {
+                        # removing missing target records
+                        dataTemp <-
+                            subset(pipe$data, subset = !is.na(pipe$data[.self$target]))
 
+                        # classification task
                         if (.self$type == "classification") {
                             classif.task = mlr::makeClassifTask(
                                 id = pipe$id,
@@ -124,7 +130,7 @@ MLPlan <-
                             )
                             pipe$addMLRTask(classif.task)
 
-                            # Classification tree, set it up for predicting probabilities
+                            # Classification lerner, set it up for predicting probabilities
                             classif.lrn = mlr::makeLearner(
                                 pipe$learner,
                                 predict.type = "response",
@@ -132,6 +138,7 @@ MLPlan <-
                             )
                             pipe$addMLRLearner(classif.lrn)
 
+                            # Train with resample and test
                             mod = mlr::resample(
                                 classif.lrn,
                                 classif.task,
@@ -141,6 +148,7 @@ MLPlan <-
                             pipe$addMLRModel(mod)
 
                         } else if (.self$type == "regression") {
+                            # regression task
                             regr.task = mlr::makeRegrTask(
                                 id = pipe$id,
                                 data = dataTemp,
@@ -148,50 +156,48 @@ MLPlan <-
                             )
                             pipe$addMLRTask(regr.task)
 
+                            # regression learner
                             regr.lrn = mlr::makeLearner(pipe$learner)
                             pipe$addMLRLearner(regr.lrn)
 
-                            mod = mlr::resample(regr.lrn,
-                                                regr.task,
-                                                pipe$train.split[[1]],
-                                                measures = list(mae, mse, timetrain))
+                            # Train with resample and test
+                            mod = mlr::resample(
+                                regr.lrn,
+                                regr.task,
+                                pipe$train.split[[1]],
+                                measures = list(mae, mse, timetrain)
+                            )
                             pipe$addMLRModel(mod)
                         }
-
                     }
-
                 }
             },
 
+            # benchmarking trained models
             benchmark = function() {
                 algorithms <-
-                    read.csv("C:/Users/Thiloshon/RProjects/rautoalgo/inst/algorithms scoring.csv")
+                    read.csv("functions/algorithms scoring.csv")
 
                 benchmark <- data.frame()
 
                 for (pipe in .self$ml.pipelines) {
+                    # get aggregated performance values
                     temp <- pipe$mlr.model[[1]]$aggr
+
                     temp$algo  <- pipe$mlr.model[[1]]$task.id
                     temp$totalTime <- pipe$mlr.model[[1]]$runtime
-
                     temp$name <-
                         algorithms[which(algorithms$algorithms_id == pipe$mlr.model[[1]]$task.id), 2]
 
                     benchmark <-
                         rbind(benchmark, temp, stringsAsFactors = F)
-
-
-                    # print(calculateConfusionMatrix(pipe$mlr.model[[1]]$pred))
-
-
                 }
-
                 .self$results <- benchmark
 
                 return(benchmark)
-
             },
 
+            # tostring
             printSelf = function() {
                 print("Machine Learning Plan Object")
                 print("Data: ")
@@ -212,6 +218,13 @@ MLPlan <-
         )
     )
 
+
+#' PipeLine r6 class.
+#'
+#' @return PipeLine object with default settings
+#'
+#'
+#' @export
 PipeLine <-
     setRefClass(
         "PipeLine",
@@ -261,14 +274,7 @@ PipeLine <-
                 .self$mlr.model <- list(mlr.model)
             },
 
-            tuneParameters = function() {
-
-            },
-
             printSelf = function() {
-                # print(paste("ID:", .self$id))
-                # print(paste("Learner:", .self$learner))
-
                 cat("Machine Learning Pipeline Object")
                 cat('\n')
                 cat('\n')
@@ -287,7 +293,6 @@ PipeLine <-
                 cat("Train, Test, Cross Validation Split: ")
                 print(.self$train.split)
                 cat("")
-
 
                 cat("#####  MLR Task: ##### ")
                 print(.self$mlr.task)
