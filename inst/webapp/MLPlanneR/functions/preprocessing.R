@@ -328,8 +328,44 @@ normalizePre <- function(data, perform = T) {
     }
 }
 
-insignificancePre <- function(data, perform = T) {
-    data <- data[, sapply(data, class) %in% c('integer', 'numeric')]
-    print(abs(cor(data)))
-    generateFilterValuesData(trainTask, method = c("information.gain", "chi.squared"))
+characterPre <- function(data, perform = T) {
+    data <- as.data.frame(data)
+    cols <-
+        colnames(data)[!(sapply(data, class) %in% c('character'))]
+
+    print(paste("Removing", colnames(data)[(sapply(data, class) %in% c('character'))]))
+
+    if (perform) {
+        dat <-
+            data[, c(cols)]
+        return(dat)
+    } else {
+        return(cols)
+    }
+}
+
+insignificancePre <- function(data, type = "classification", target) {
+    data <- data[, sapply(data, class) %in% c('integer', 'numeric', 'factor')]
+
+    task <- list()
+
+    if(type == "regression"){
+        task <- mlr::makeRegrTask(data = data,
+                                         target = target)
+    } else {
+        task <- mlr::makeClassifTask(data = data,
+                                         target = target)
+    }
+
+    d <- generateFilterValuesData(
+        task,
+        method = c(
+            "FSelector_information.gain",
+            "FSelector_chi.squared"
+        )
+    )
+
+    cols <- c(d$data$name[d$data$FSelector_information.gain > 0.4], target)
+
+    return(data[, cols])
 }

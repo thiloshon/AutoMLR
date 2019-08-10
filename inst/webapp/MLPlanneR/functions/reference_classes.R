@@ -105,6 +105,10 @@ MLPlan <-
                                     list(data = pipe$data, perform = T))
                         pipe$setData(dataTemp)
                     }
+
+                    pipe$setData(characterPre(pipe$data))
+                    pipe$setData(insignificancePre(pipe$data, .self$type, .self$target))
+
                 }
 
                 message("Data after preprocessing: ")
