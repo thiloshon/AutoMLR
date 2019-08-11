@@ -65,7 +65,7 @@ a {
 }
 
 .tabbable {
-        height: 80vh;
+       /* height: 80vh;*/
 }
 
 /* .progressStep {
@@ -187,4 +187,21 @@ background: rgba(0,0,0,.1);
         margin-left: 20%;
 }
 
+.form-control {
+    background-color: transparent;
+    border-color: #c6cace;
+    color: #999;
+}
+
+
+.selectize-input {
+    background-color: transparent;
+    color: #999;
+    border-radius: 0px;
+    border: 1px solid #1fc9a8;
+}
+
+.selectize-input.full {
+    background-color: transparent;
+}
 

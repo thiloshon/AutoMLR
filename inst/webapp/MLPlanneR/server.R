@@ -11,13 +11,13 @@ source("functions/preprocessing.R")
 options(scipen = 999)
 
 shinyServer(function(input, output, session) {
-
     # main data storage
     dataStore <-
         list(
             learning.type = "classification",
             mlPlan = NULL,
-            inputReceived = FALSE
+            inputSource = "NA",
+            con <- list()
         )
 
     showModal(modalDialog(img(src = "82.png", align = "center")))
@@ -57,6 +57,8 @@ shinyServer(function(input, output, session) {
             if (is.null(input$inputFile))
                 return("No data to view")
 
+            dataStore$inputReceived <<- "FILE"
+
             output$inputDataTable <-
                 DT::renderDataTable(DT::datatable({
                     data.table::fread(input$inputFile$datapath)
@@ -66,13 +68,58 @@ shinyServer(function(input, output, session) {
 
     # input file is selected
     observeEvent(input$select.data.button, {
-        dataStore$inputReceived <<- TRUE
-        dataStore$mlPlan$addData(data.table::fread(input$inputFile$datapath))
+        if(dataStore$inputReceived == "FILE"){
+            dataStore$mlPlan$addData(data.table::fread(input$inputFile$datapath))
+        } else {
+            dataStore$mlPlan$addData(DBI::dbReadTable(dataStore$con, input$selected.table))
+            DBI::dbDisconnect(dataStore$con)
+        }
+
 
         print(summarizeColumns(dataStore$mlPlan$data))
-
         updateTabsetPanel(session, "mlplan", selected = "select.target.tab")
     })
+
+    observeEvent(input$get.tables, {
+        output$database.tables <- renderUI({
+            input$get.tables
+
+            dataStore$con <<- DBI::dbConnect(
+                RMySQL::MySQL(),
+                dbname = input$db_name,
+                user    = input$db_user,
+                password    = input$db_pass,
+                host = input$db_server,
+                port = input$db_port
+            )
+            tables <- DBI::dbListTables(dataStore$con)
+
+
+            components <- list(
+                selectInput(
+                    "selected.table",
+                    label = h3("Select Table"),
+                    choices = setNames(tables,
+                                       tables),
+                    selected = tables[1]
+                )
+            )
+            components <-
+                c(components,
+                  DT::dataTableOutput("dbTable"))
+
+            dataStore$inputReceived <<- "DB"
+
+            return(div(id = 'dbTableSelect',
+                       column(width = 12,
+                              components)))
+        })
+    })
+
+    output$dbTable <- DT::renderDataTable({
+        DBI::dbReadTable(dataStore$con, input$selected.table)
+    }, width = 300)
+
 
     # target value is selected
     observeEvent(input$select.target.button, {
@@ -250,14 +297,15 @@ shinyServer(function(input, output, session) {
 
         isAccuracy <-
             dataStore$mlPlan$evaluation == "Accuracy"
-        isBalanceError <- dataStore$mlPlan$evaluation == "Balanced Error Rate"
+        isBalanceError <-
+            dataStore$mlPlan$evaluation == "Balanced Error Rate"
 
         if (isAccuracy) {
-            data <- data[order(-data$acc.test.mean), ]
+            data <- data[order(-data$acc.test.mean),]
         } else if (isBalanceError) {
-            data <- data[order(data$ber.test.mean), ]
+            data <- data[order(data$ber.test.mean),]
         } else {
-            data <- data[order(data$mae.test.mean), ]
+            data <- data[order(data$mae.test.mean),]
         }
 
         components <- list()
@@ -277,7 +325,11 @@ shinyServer(function(input, output, session) {
                 ifelse(
                     isAccuracy,
                     "Out of Sample Accuracy: ",
-                    ifelse(isBalanceError, "Balanced Error Rate", "Mean Absolute Error: ")
+                    ifelse(
+                        isBalanceError,
+                        "Balanced Error Rate",
+                        "Mean Absolute Error: "
+                    )
                 )
             components[[i]] <- tagList(
                 HTML(
@@ -307,14 +359,16 @@ shinyServer(function(input, output, session) {
             )
         }
 
-        return(div(
-            id = "trainSelect",
-            class = "form-group shiny-input-checkboxgroup shiny-input-container shiny-bound-input",
-            tags$br(),
-            tags$br(),
-            column(width = 12,
-                   components)
-        ))
+        return(
+            div(
+                id = "trainSelect",
+                class = "form-group shiny-input-checkboxgroup shiny-input-container shiny-bound-input",
+                tags$br(),
+                tags$br(),
+                column(width = 12,
+                       components)
+            )
+        )
     })
 
 
@@ -342,14 +396,15 @@ shinyServer(function(input, output, session) {
             for (mod in 1:4) {
                 preprocString <- list()
                 count <- nrow(preproc)
-                pre <- preproc[sample(1:count, (count * 0.25 * mod )), ]
+                pre <-
+                    preproc[sample(1:count, (count * 0.25 * mod)),]
 
                 for (d in 1:nrow(pre)) {
-                    if(nrow(pre) == 0 & !empty){
+                    if (nrow(pre) == 0 & !empty) {
                         preprocString[[length(preprocString) + 1]] <-
                             tags$p("None")
                         empty <- T
-                    }else {
+                    } else {
                         preprocString[[length(preprocString) + 1]] <-
                             tags$p(paste(pre[d, 2], "on", pre[d, 3]))
                     }
@@ -373,9 +428,9 @@ shinyServer(function(input, output, session) {
                             preprocString),
                         div(class = "checksListTopic col-sm-3", p("Train / Test Split: ")),
                         div(class = "checksListTitle",
-                            p(paste(
-                                split * 100, "/", 100 - (split * 100)
-                            ))),
+                            p(
+                                paste(split * 100, "/", 100 - (split * 100))
+                            )),
 
                         div(class = "checksListTopic col-sm-3", p("Evaluation Metric")),
                         div(class = "checksListTitle",
