@@ -47,7 +47,7 @@ MLPlan <-
                     classes.count <-
                         as.data.frame(table(factored.predictor))
                     classes.count <-
-                        classes.count[order(-classes.count$Freq),]
+                        classes.count[order(-classes.count$Freq), ]
 
                     .self$data.meta$number.of.classes <-
                         nrow(classes.count)
@@ -103,11 +103,12 @@ MLPlan <-
                         dataTemp <-
                             do.call(pipe$preprocessing[row, 1],
                                     list(data = pipe$data, perform = T))
+
                         pipe$setData(dataTemp)
                     }
 
                     pipe$setData(characterPre(pipe$data))
-                    pipe$setData(insignificancePre(pipe$data, .self$type, .self$target))
+                    # pipe$setData(insignificancePre(pipe$data, .self$type, .self$target))
 
                 }
 
@@ -147,7 +148,8 @@ MLPlan <-
                                 classif.lrn,
                                 classif.task,
                                 pipe$train.split[[1]],
-                                measures = list(ber, acc, timetrain)
+                                measures = list(ber, acc, timetrain),
+                                models = TRUE
                             )
                             pipe$addMLRModel(mod)
 
@@ -169,7 +171,8 @@ MLPlan <-
                                 regr.lrn,
                                 regr.task,
                                 pipe$train.split[[1]],
-                                measures = list(mae, mse, timetrain)
+                                measures = list(mae, mse, timetrain),
+                                models = TRUE
                             )
                             pipe$addMLRModel(mod)
                         }
@@ -187,7 +190,6 @@ MLPlan <-
                 for (pipe in .self$ml.pipelines) {
                     # get aggregated performance values
                     temp <- pipe$mlr.model[[1]]$aggr
-
                     temp$algo  <- pipe$mlr.model[[1]]$task.id
                     temp$totalTime <- pipe$mlr.model[[1]]$runtime
                     temp$name <-
@@ -199,6 +201,29 @@ MLPlan <-
                 .self$results <- benchmark
 
                 return(benchmark)
+            },
+
+            predict = function() {
+                # Find the best model
+                pipes <- .self$ml.pipelines
+
+                if (.self$evaluation == "Accuracy") {
+                    pipes <- pipes[order(sapply(pipes, function(x) x$mlr.model$aggr$acc.test.mean))]
+                    # pipes <- pipes[order(pipes$mlr.model[[1]]$aggr$acc.test.mean), ]
+                } else if (dataStore$mlPlan$evaluation == "Balanced Error Rate") {
+                    pipes <- pipes[order(pipes$mlr.model[[1]]$aggr$ber.test.mean), ]
+                } else {
+                    pipes <- pipes[order(pipes$mlr.model[[1]]$aggr$mae.test.mean), ]
+                }
+
+                model <- pipes[[1]]$mlr.model[[1]]$models[[1]]
+
+                newdata.pred <- stats::predict(model, newdata = head(iris)[, 1:4])
+
+                print(str(newdata.pred))
+
+                return(newdata.pred)
+
             },
 
             # tostring

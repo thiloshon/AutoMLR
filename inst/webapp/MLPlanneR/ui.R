@@ -17,26 +17,26 @@ shinyUI(dashboardPage(
     dashboardSidebar(
         sidebarMenu(
             id = "sideBar",
-            menuItem("Setup Plan",
+            menuItem("Create Project",
                      tabName = "add",
                      icon = icon("cog")),
 
             menuItem(
-                "Generate Pipes",
+                "Generate Models",
                 tabName = "pipes",
                 icon = icon("cubes")
             ),
 
-            menuItem("Play Plan",
+            menuItem("Train and Test",
                      tabName = "play",
                      icon = icon("play")),
 
-            menuItem("Evaluate Plan",
+            menuItem("Experiment",
                      tabName = "breed",
                      icon = icon("vial")),
 
             menuItem(
-                "Download Artifacts",
+                "Manage Artifacts",
                 tabName = "document",
                 icon = icon("file-download")
             )
@@ -61,7 +61,7 @@ shinyUI(dashboardPage(
             tabItem("add",
                     fluidRow(column(
                         12,
-                        h1("Create Machine Learning Plan"),
+                        h1("Create Machine Learning Project"),
                         column(
                             12,
                             tabsetPanel(
@@ -74,7 +74,7 @@ shinyUI(dashboardPage(
                                     "Select Learning Type",
                                     value = "select.type",
 
-                                    div(class = "secondaryHeaders", h3("Select Learning Type of ML Plan:")),
+                                    div(class = "secondaryHeaders", h3("Select Learning Type of ML Project:")),
                                     div(
                                         # id = "queryDatabaseDiv",
                                         # class = "activeButton",
@@ -211,7 +211,7 @@ shinyUI(dashboardPage(
             tabItem("pipes",
                     fluidRow(column(
                         12,
-                        h1("Add Machine Learning Pipes"),
+                        h1("Add Machine Learning Models"),
                         column(
                             12,
                             tabsetPanel(
@@ -223,7 +223,7 @@ shinyUI(dashboardPage(
                                 tabPanel(
                                     "Select Pipes",
                                     value = "data.split",
-                                    div(class = "secondaryHeaders", h3("Select Machine Learning Pipes")),
+                                    div(class = "secondaryHeaders", h3("Select Machine Learning Models")),
 
                                     # sliderInput(
                                     #     "slider2",
@@ -256,7 +256,7 @@ shinyUI(dashboardPage(
             tabItem("play",
                     fluidRow(column(
                         12,
-                        h1("Train Machine Learning Pipes"),
+                        h1("Train Machine Learning Models"),
                         column(
                             12,
 

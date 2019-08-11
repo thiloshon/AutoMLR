@@ -333,8 +333,6 @@ characterPre <- function(data, perform = T) {
     cols <-
         colnames(data)[!(sapply(data, class) %in% c('character'))]
 
-    print(paste("Removing", colnames(data)[(sapply(data, class) %in% c('character'))]))
-
     if (perform) {
         dat <-
             data[, c(cols)]

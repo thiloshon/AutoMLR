@@ -1,6 +1,7 @@
 library(shiny)
 library(ggplot2)
 library(mlr)
+library(fiery)
 
 source("functions/reference_classes.R")
 source("functions/algorithm_recommender-learner.R")
@@ -17,7 +18,8 @@ shinyServer(function(input, output, session) {
             learning.type = "classification",
             mlPlan = NULL,
             inputSource = "NA",
-            con <- list()
+            con <- list(),
+            bestModel <- list()
         )
 
     showModal(modalDialog(img(src = "82.png", align = "center")))
@@ -281,6 +283,7 @@ shinyServer(function(input, output, session) {
             dataStore$mlPlan$addPipe(pipe)
 
         }
+
         dataStore$mlPlan$split()
         updateTabItems(session, "sideBar", "play")
     })
@@ -292,7 +295,11 @@ shinyServer(function(input, output, session) {
             dataStore$mlPlan$train()
         })
 
+
+
         data <- dataStore$mlPlan$benchmark()
+        dataStore$mlPlan$predict()
+
         data$index <- c(1:nrow(data))
 
         isAccuracy <-
@@ -465,6 +472,58 @@ shinyServer(function(input, output, session) {
         updateTabItems(session, "sideBar", "breed")
     })
 
+    observeEvent(input$startService, {
+
+        app <- Fire$new()
+        app$host <- "127.0.0.1"
+        app$port <- 1234 # completely arbitrary selection, make it whatevs
+
+        app$on("start", function(server, ...) {
+            showNotification(paste0("Serving from ", app$host, ":" ,app$port), duration = 6)
+        })
+
+        app$on('request', function(server, id, request, ...) {
+
+            response <- list(
+                status = 200L,
+                headers = list('Content-Type'='json/application'),
+                body = ''
+            )
+
+            if (grepl("predict", request$url)) {
+                # this gets the query string; we're expecting val=##
+                # but aren't going to do any error checking here.
+                # You also would want to ensure there is nothing
+                # malicious in the query string.
+                query  <- get("QUERY_STRING", envir=request)
+
+                # handy helper function from the Shiny folks
+                input <- shiny::parseQueryString(query)
+
+                print(input)
+
+                message(sprintf("Input: %s", input$val))
+
+                # run the prediction and add the input var value to the list
+                res <- predict(model, data.frame(x=as.numeric(input$val)), se.fit = TRUE)
+                res$INPUT <- input$val
+
+                # we want to return JSON
+                response$headers <- list("Content-Type"="application/json")
+                response$body <- jsonlite::toJSON(res, auto_unbox=TRUE, pretty=TRUE)
+
+            }
+
+            response
+
+        })
+
+        # don't fire off a browser call
+        app$ignite(showcase=FALSE)
+
+
+    })
+
 
 
     #  artifacts are generated
@@ -555,6 +614,16 @@ shinyServer(function(input, output, session) {
                 br(),
                 br(),
                 includeMarkdown("Report/generateCodeReport.md")
+            ),
+
+            tabPanel(
+                "Prediction Web Service",
+                div(class = "secondaryHeaders", h3(
+                    "Artifact 05: Predictictive RESTful Service"
+                )),
+                br(),
+                br(),
+                actionButton("startService", "Start Service")
             )
         ))
     })
