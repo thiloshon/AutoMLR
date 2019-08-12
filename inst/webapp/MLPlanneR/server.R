@@ -2,6 +2,7 @@ library(shiny)
 library(ggplot2)
 library(mlr)
 library(fiery)
+library(routr)
 
 source("functions/reference_classes.R")
 source("functions/algorithm_recommender-learner.R")
@@ -19,7 +20,7 @@ shinyServer(function(input, output, session) {
             mlPlan = NULL,
             inputSource = "NA",
             con <- list(),
-            bestModel <- list()
+            service <- list()
         )
 
     showModal(modalDialog(img(src = "82.png", align = "center")))
@@ -70,7 +71,7 @@ shinyServer(function(input, output, session) {
 
     # input file is selected
     observeEvent(input$select.data.button, {
-        if(dataStore$inputReceived == "FILE"){
+        if (dataStore$inputReceived == "FILE") {
             dataStore$mlPlan$addData(data.table::fread(input$inputFile$datapath))
         } else {
             dataStore$mlPlan$addData(DBI::dbReadTable(dataStore$con, input$selected.table))
@@ -295,11 +296,7 @@ shinyServer(function(input, output, session) {
             dataStore$mlPlan$train()
         })
 
-
-
         data <- dataStore$mlPlan$benchmark()
-        dataStore$mlPlan$predict()
-
         data$index <- c(1:nrow(data))
 
         isAccuracy <-
@@ -308,15 +305,14 @@ shinyServer(function(input, output, session) {
             dataStore$mlPlan$evaluation == "Balanced Error Rate"
 
         if (isAccuracy) {
-            data <- data[order(-data$acc.test.mean),]
+            data <- data[order(-data$acc.test.mean), ]
         } else if (isBalanceError) {
-            data <- data[order(data$ber.test.mean),]
+            data <- data[order(data$ber.test.mean), ]
         } else {
-            data <- data[order(data$mae.test.mean),]
+            data <- data[order(data$mae.test.mean), ]
         }
 
         components <- list()
-
         for (i in 1:nrow(data)) {
             value <-
                 ifelse(
@@ -378,7 +374,6 @@ shinyServer(function(input, output, session) {
         )
     })
 
-
     # Breeding algorithms are shown
     observeEvent(input$breed.models, {
         components <- list()
@@ -404,7 +399,7 @@ shinyServer(function(input, output, session) {
                 preprocString <- list()
                 count <- nrow(preproc)
                 pre <-
-                    preproc[sample(1:count, (count * 0.25 * mod)),]
+                    preproc[sample(1:count, (count * 0.25 * mod)), ]
 
                 for (d in 1:nrow(pre)) {
                     if (nrow(pre) == 0 & !empty) {
@@ -473,65 +468,49 @@ shinyServer(function(input, output, session) {
     })
 
     observeEvent(input$startService, {
-
-        app <- Fire$new()
+        app <- fiery::Fire$new()
         app$host <- "127.0.0.1"
-        app$port <- 1234 # completely arbitrary selection, make it whatevs
+        app$port <- input$servicePort
 
         app$on("start", function(server, ...) {
-            showNotification(paste0("Serving from ", app$host, ":" ,app$port), duration = 6)
+            showNotification(paste0("Serving from ", app$host, ":" , app$port),
+                             duration = 6)
         })
 
-        app$on('request', function(server, id, request, ...) {
+        router <- routr::RouteStack$new()
+        route <- routr::Route$new()
+        router$add_route(route, 'main')
 
-            response <- list(
-                status = 200L,
-                headers = list('Content-Type'='json/application'),
-                body = ''
-            )
-
-            if (grepl("predict", request$url)) {
-                # this gets the query string; we're expecting val=##
-                # but aren't going to do any error checking here.
-                # You also would want to ensure there is nothing
-                # malicious in the query string.
-                query  <- get("QUERY_STRING", envir=request)
-
-                # handy helper function from the Shiny folks
-                input <- shiny::parseQueryString(query)
-
-                print(input)
-
-                message(sprintf("Input: %s", input$val))
-
-                # run the prediction and add the input var value to the list
-                res <- predict(model, data.frame(x=as.numeric(input$val)), se.fit = TRUE)
-                res$INPUT <- input$val
-
-                # we want to return JSON
-                response$headers <- list("Content-Type"="application/json")
-                response$body <- jsonlite::toJSON(res, auto_unbox=TRUE, pretty=TRUE)
-
-            }
-
-            response
-
+        route$add_handler('get', '/predict', function(request,
+                                                      response,
+                                                      keys,
+                                                      arg_list,
+                                                      ...) {
+            inputParams <- shiny::parseQueryString(request$querystring)
+            predict <-
+                dataStore$mlPlan$predict(as.data.frame(inputParams))
+            response$body <-
+                jsonlite::toJSON(predict,
+                                 auto_unbox = TRUE,
+                                 pretty = TRUE)
+            response$status <- 200L
+            message(response)
+            TRUE
         })
-
-        # don't fire off a browser call
-        app$ignite(showcase=FALSE)
-
-
+        dataStore$service <<- app
+        app$attach(router)
+        app$ignite()
     })
 
-
+    observeEvent(input$stopService, {
+        dataStore$service[[1]]$extinguish()
+    })
 
     #  artifacts are generated
     observeEvent(input$train.models, {
         updateTabItems(session, "sideBar", "document")
         generate_detailed_report(dataStore)
         generate_code_report(dataStore)
-
     })
 
     # Report is generated
@@ -560,72 +539,77 @@ shinyServer(function(input, output, session) {
                     output_dir = 'Report'
                 ))
                 message(paste("Saved generated reports to '", tempdir(), sep = ""))
-
             })
         }
 
     # Artifacts are shown
     output$documentContentUI <- renderUI({
         input$flagButton
-        tagList(tabsetPanel(
-            type = "tabs",
-            tabPanel(
-                "Data",
-                div(class = "secondaryHeaders", h3("Artifact 01: Input Data")),
-                downloadButton("downloadInput", "Download Input Data"),
-                br(),
-                br(),
-                DT::renderDataTable(dataStore$mlPlan$data, width = 300)
-            ),
-            tabPanel(
-                "Models",
-                div(class = "secondaryHeaders", h3(
-                    "Artifact 02: Machine Learning Models"
-                )),
-
-                br(),
-
-                helpText(
-                    "Models will be downloaded as .RData file. Load with command load('filename.RData') and a list object with the name `models` will be loaded to the calling environment with each models as elements of the list. Use mlr package to continue experiment."
+        tagList(
+            tabsetPanel(
+                type = "tabs",
+                tabPanel(
+                    "Data",
+                    div(class = "secondaryHeaders", h3("Artifact 01: Input Data")),
+                    downloadButton("downloadInput", "Download Input Data"),
+                    br(),
+                    br(),
+                    DT::renderDataTable(dataStore$mlPlan$data, width = 300)
                 ),
-                br(),
-                downloadButton("downloadModels", "Download Trained Models"),
-                br()
-            ),
+                tabPanel(
+                    "Models",
+                    div(class = "secondaryHeaders", h3(
+                        "Artifact 02: Machine Learning Models"
+                    )),
 
-            tabPanel(
-                "Report",
-                div(
-                    class = "secondaryHeaders",
-                    h3("Artifact 03: Extensive Machine Learning Report")
+                    br(),
+
+                    helpText(
+                        "Models will be downloaded as .RData file. Load with command load('filename.RData') and a list object with the name `models` will be loaded to the calling environment with each models as elements of the list. Use mlr package to continue experiment."
+                    ),
+                    br(),
+                    downloadButton("downloadModels", "Download Trained Models"),
+                    br()
                 ),
 
-                downloadButton("downloadShortReport", "Download Report in PDF"),
-                br(),
-                br(),
-                includeMarkdown("Report/generateDetailedReport.md")
-            ),
+                tabPanel(
+                    "Report",
+                    div(
+                        class = "secondaryHeaders",
+                        h3("Artifact 03: Extensive Machine Learning Report")
+                    ),
 
-            tabPanel(
-                "Source Code",
-                div(class = "secondaryHeaders", h3(
-                    "Artifact 04: Workflow Source Code"
-                )),
-                br(),
-                br(),
-                includeMarkdown("Report/generateCodeReport.md")
-            ),
+                    downloadButton("downloadShortReport", "Download Report in PDF"),
+                    br(),
+                    br(),
+                    includeMarkdown("Report/generateDetailedReport.md")
+                ),
 
-            tabPanel(
-                "Prediction Web Service",
-                div(class = "secondaryHeaders", h3(
-                    "Artifact 05: Predictictive RESTful Service"
-                )),
-                br(),
-                br(),
-                actionButton("startService", "Start Service")
+                tabPanel(
+                    "Source Code",
+                    div(class = "secondaryHeaders", h3(
+                        "Artifact 04: Workflow Source Code"
+                    )),
+                    br(),
+                    br(),
+                    includeMarkdown("Report/generateCodeReport.md")
+                ),
+
+                tabPanel(
+                    "Prediction Web Service",
+                    div(class = "secondaryHeaders", h3(
+                        "Artifact 05: Predictive RESTful Service"
+                    )),
+                    numericInput(
+                        "servicePort",
+                        label = h3("Port for Service"),
+                        value = 8080
+                    ),
+                    actionButton("startService", "Start Service"),
+                    actionButton("stopService", "Stop Service")
+                )
             )
-        ))
+        )
     })
 
 
@@ -670,8 +654,6 @@ shinyServer(function(input, output, session) {
 
 
     # ------------------REFERENCE POINT-----------------
-
-
 
     output$regre <- reactive({
         return(input$deploy.regression[[1]])

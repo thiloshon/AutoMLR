@@ -203,13 +203,12 @@ MLPlan <-
                 return(benchmark)
             },
 
-            predict = function() {
+            predict = function(new_data) {
                 # Find the best model
                 pipes <- .self$ml.pipelines
 
                 if (.self$evaluation == "Accuracy") {
                     pipes <- pipes[order(sapply(pipes, function(x) x$mlr.model$aggr$acc.test.mean))]
-                    # pipes <- pipes[order(pipes$mlr.model[[1]]$aggr$acc.test.mean), ]
                 } else if (dataStore$mlPlan$evaluation == "Balanced Error Rate") {
                     pipes <- pipes[order(pipes$mlr.model[[1]]$aggr$ber.test.mean), ]
                 } else {
@@ -217,13 +216,9 @@ MLPlan <-
                 }
 
                 model <- pipes[[1]]$mlr.model[[1]]$models[[1]]
+                newdata.pred <- stats::predict(model, newdata = new_data)
 
-                newdata.pred <- stats::predict(model, newdata = head(iris)[, 1:4])
-
-                print(str(newdata.pred))
-
-                return(newdata.pred)
-
+                return(newdata.pred$data)
             },
 
             # tostring
