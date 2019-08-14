@@ -183,7 +183,7 @@ MLPlan <-
             # benchmarking trained models
             benchmark = function() {
                 algorithms <-
-                    read.csv("functions/algorithms scoring.csv")
+                    read.csv("functions/algorithms_scoring.csv")
 
                 benchmark <- data.frame()
 
