@@ -5,5 +5,5 @@
 #'
 #' @export
 run_mlr <- function(){
-    shiny::runApp('inst/webapp/MLPlanneR')
+    shiny::runApp('webapp/MLPlanneR')
 }
