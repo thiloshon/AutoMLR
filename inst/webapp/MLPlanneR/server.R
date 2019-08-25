@@ -518,7 +518,7 @@ shinyServer(function(input, output, session) {
         function(dataStore) {
             withProgress(message = "Preparing Reports and Artifacts...", {
                 try(rmarkdown::render(
-                    file.path("functions/generateDetailedReport.Rmd"),
+                    system.file("rmd/generateDetailedReport.Rmd", package = "automlr"),
                     c("pdf_document", "md_document"),
                     quiet = T,
                     output_dir = tempdir()
@@ -533,7 +533,7 @@ shinyServer(function(input, output, session) {
         function(dataStore) {
             withProgress(message = "Preparing Reports and Artifacts...", {
                 try(rmarkdown::render(
-                    file.path("functions/generateCodeReport.Rmd"),
+                    system.file("rmd/generateCodeReport.Rmd", package = "automlr"),
                     c("pdf_document", "md_document"),
                     quiet = T,
                     output_dir = tempdir()
