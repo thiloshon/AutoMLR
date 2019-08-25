@@ -521,7 +521,7 @@ shinyServer(function(input, output, session) {
                     file.path("functions/generateDetailedReport.Rmd"),
                     c("pdf_document", "md_document"),
                     quiet = T,
-                    output_dir = 'Report'
+                    output_dir = tempdir()
                 ))
 
                 message(paste("Saved generated reports to '", tempdir(), sep = ""))
@@ -536,7 +536,7 @@ shinyServer(function(input, output, session) {
                     file.path("functions/generateCodeReport.Rmd"),
                     c("pdf_document", "md_document"),
                     quiet = T,
-                    output_dir = 'Report'
+                    output_dir = tempdir()
                 ))
                 message(paste("Saved generated reports to '", tempdir(), sep = ""))
             })
@@ -582,7 +582,7 @@ shinyServer(function(input, output, session) {
                     downloadButton("downloadShortReport", "Download Report in PDF"),
                     br(),
                     br(),
-                    includeMarkdown("Report/generateDetailedReport.md")
+                    includeMarkdown(paste0(tempdir(), "/generateDetailedReport.md"))
                 ),
 
                 tabPanel(
@@ -592,7 +592,7 @@ shinyServer(function(input, output, session) {
                     )),
                     br(),
                     br(),
-                    includeMarkdown("Report/generateCodeReport.md")
+                    includeMarkdown(paste0(tempdir(), "/generateCodeReport.md"))
                 ),
 
                 tabPanel(
@@ -647,7 +647,7 @@ shinyServer(function(input, output, session) {
                   sep = "")
         },
         content = function(con) {
-            file.copy('Report/generateDetailedReport.pdf',
+            file.copy(paste0(tempdir(), "/generateDetailedReport.md"),
                       con)
         }
     )
