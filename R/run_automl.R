@@ -5,5 +5,6 @@
 #'
 #' @export
 run_mlr <- function(){
-    shiny::runApp('inst/webapp/MLPlanneR')
+    app_path <- system.file("webapp/MLPlanneR", package = "automlr")
+    return(shiny::runApp(app_path, launch.browser = TRUE))
 }

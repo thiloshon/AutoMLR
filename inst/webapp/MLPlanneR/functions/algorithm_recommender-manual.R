@@ -118,7 +118,7 @@ suggest_learner_manual <-
         }
 
         algorithms_manual <-
-            read.csv("functions/algorithms scoring.csv")
+            read.csv("functions/algorithms_scoring.csv")
         algorithms_manual[is.na(algorithms_manual)] <- 0
 
         scoreboard <-

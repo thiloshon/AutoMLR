@@ -21,3 +21,5 @@ Imports: rmarkdown, knitr, shiny, shinydashboard, shinyjs, DT, data.table, mlr, 
 Depends: R (>= 2.10)
 RoxygenNote: 6.1.1
 LazyData: true
+Suggests: 
+    testthat
