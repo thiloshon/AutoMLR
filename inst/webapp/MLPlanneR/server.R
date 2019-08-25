@@ -494,7 +494,7 @@ shinyServer(function(input, output, session) {
                                  auto_unbox = TRUE,
                                  pretty = TRUE)
             response$status <- 200L
-            message(response)
+            print(response)
             TRUE
         })
         dataStore$service <<- app
