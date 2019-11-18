@@ -477,6 +477,13 @@ shinyServer(function(input, output, session) {
                              duration = 6)
         })
 
+        # app$on('request', function(server, request, ...) {
+        #     response <- request$respond()
+        #     response$status <- 200L
+        #     response$body <- paste0('')
+        #     response$type <- 'html'
+        # })
+
         router <- routr::RouteStack$new()
         route <- routr::Route$new()
         router$add_route(route, 'main')
@@ -487,6 +494,7 @@ shinyServer(function(input, output, session) {
                                                       arg_list,
                                                       ...) {
             inputParams <- shiny::parseQueryString(request$querystring)
+
             predict <-
                 dataStore$mlPlan$predict(as.data.frame(inputParams))
             response$body <-
@@ -494,7 +502,6 @@ shinyServer(function(input, output, session) {
                                  auto_unbox = TRUE,
                                  pretty = TRUE)
             response$status <- 200L
-            print(response)
             TRUE
         })
         dataStore$service <<- app

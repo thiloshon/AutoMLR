@@ -207,16 +207,21 @@ MLPlan <-
                 # Find the best model
                 pipes <- .self$ml.pipelines
 
-                if (.self$evaluation == "Accuracy") {
-                    pipes <- pipes[order(sapply(pipes, function(x) x$mlr.model$aggr$acc.test.mean))]
-                } else if (dataStore$mlPlan$evaluation == "Balanced Error Rate") {
-                    pipes <- pipes[order(pipes$mlr.model[[1]]$aggr$ber.test.mean), ]
-                } else {
-                    pipes <- pipes[order(pipes$mlr.model[[1]]$aggr$mae.test.mean), ]
-                }
+                # if (.self$evaluation == "Accuracy") {
+                #     pipes$printSelf
+                #     pipes <- pipes[order(sapply(pipes, function(x) x$mlr.model$aggr$acc.test.mean))]
+                #     pipes <- pipes[order(pipes$mlr.model[[1]]$aggr$ber.test.mean), ]
+                # } else if (dataStore$mlPlan$evaluation == "Balanced Error Rate") {
+                #     pipes <- pipes[order(pipes$mlr.model[[1]]$aggr$ber.test.mean), ]
+                # } else {
+                #     pipes <- pipes[order(pipes$mlr.model[[1]]$aggr$mae.test.mean), ]
+                # }
 
+                print("mod")
                 model <- pipes[[1]]$mlr.model[[1]]$models[[1]]
+                print("pred")
                 newdata.pred <- stats::predict(model, newdata = new_data)
+                print("ret")
 
                 return(newdata.pred$data)
             },
