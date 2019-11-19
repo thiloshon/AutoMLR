@@ -233,7 +233,7 @@ imputePre <- function(data, perform = T) {
 
     if (perform) {
         imp <-
-            impute(
+            mlr::impute(
                 data,
                 classes = list(
                     factor = imputeMode(),

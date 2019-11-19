@@ -140,7 +140,7 @@ shinyUI(dashboardPage(
                                                     textInput(
                                                         "db_name",
                                                         label = h3("Database Name"),
-                                                        value = "openbank_openbankingdb_aug02_berlin"
+                                                        value = "machine_learning_datasets"
                                                     ),
                                                     textInput(
                                                         "db_server",
@@ -149,7 +149,7 @@ shinyUI(dashboardPage(
                                                     ),
                                                     numericInput("db_port", label = h3("Port"), value = "3306"),
                                                     textInput("db_user", label = h3("Username"), value = "root"),
-                                                    passwordInput("db_pass", label = h3("Password"), value = "rootroot"),
+                                                    passwordInput("db_pass", label = h3("Password"), value = ""),
                                                     br(),
                                                     actionButton("get.tables", label = "Connect To Database"),
 
